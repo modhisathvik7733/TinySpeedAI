@@ -243,6 +243,9 @@ def build(name, vocab):
     if name.startswith("hpt"):
         from hpt import build_hpt
         return build_hpt(name, vocab)
+    if name.startswith("sac"):
+        from sac import build_sac
+        return build_sac(name, vocab)
     if name.startswith("fgpt"):
         from fgpt import build_fgpt
         return build_fgpt(name, vocab)

@@ -1,4 +1,43 @@
-# Design: intelligence from organisation, not brute force
+# SAC: Sparse Associative Cortex (current design)
+
+## The premise, challenged with our own measurements
+| what we measured | what it means |
+|---|---|
+| Every dense model on this GPU runs at ~20 TFLOPS; loss per second followed FLOPs per token | Speed is set by **how many weights each token touches**, not by kernels |
+| HPT (patching, 5M tok/s) lost 0.6 nats; repeated-name loss 4.9 vs 2.1 | Compressing tokens destroys **binding** |
+| SGHM (fixed fast-synapse memory) bound names well and *improved* at 4x its training length | Binding needs a content-addressed store, **not attention** |
+
+What the brain gets free that a transformer pays for:
+1. **Capacity without compute.** About 10^14 synapses, but ~1-2% of neurons fire, so each moment touches a sliver of the weights. A transformer multiplies every weight by every token, so its speed is chained to its size. On a GPU this kind of sparsity only pays as a **lookup**: fetch a few rows by key instead of masking a dense matmul.
+2. **Context in changing synapses, not a replay tape.** A fixed-size state means cost per token does not depend on context length.
+3. **Novelty-gated writing.** Only what the cortex failed to predict gets stored.
+
+## Three radically different mechanisms
+- **A. Sparse Associative Cortex (selected).** Two content-addressed memories with different time constants. An *episodic* fast-weight state per head (fixed size, surprise-gated writes) does binding within the context. A *semantic* product-key memory of N slots, of which each token fires only the top k (32 of 65k to 1M), holds knowledge. The dense pathway is thin: per-channel causal convolutions plus the memories' own projections.
+- **B. Holographic phase binding.** Complex rotating codes, binding by circular convolution, and a superposition memory built by prefix sums. Parallel and cheap, but superposition capacity is about d items and collapses with many names in a story, which is exactly where binding matters.
+- **C. Event-driven predictive-coding columns.** Units update only when the error crosses a threshold. Thresholded state updates are sequential and cannot train in parallel on a GPU.
+
+**Why A.** It is the only one that attacks both measured bottlenecks: binding (fixed memory, validated by SGHM) and capacity per FLOP (sparse lookup). The two memories together give a capability neither has alone: **parameters grow without slowing training (N), and context grows without slowing training (T)**. Every part has an ablation (`sac_nopkm`, `sac_noepi`, `sac_nogate`).
+
+## Information flow (`sac.py`, layout "cpcecpce", d=256)
+```
+token -> embed -> c -> p -> c -> [surprise] -> e -> c -> p -> c -> e -> adaptive softmax
+  c  local wiring: two causal depthwise convs, one gating the other (no dense projection, ~2K MACs)
+  p  semantic memory: q = W x ; two half-queries score sqrt(N) sub-keys each ; top-k of the k*k sums
+     -> softmax -> embedding_bag over k value rows (fused gather-sum)
+  e  episodic memory: S <- lam*S + g v k^T ; r = S_{t-1} q ; g = sigmoid(a(surprise - b))
+     training: chunk-parallel (C=64): masked C x C matmul inside chunks + an n x n decay matmul across
+     chunk states (no sequential scan; all exponents >= 0, so stable at any length)
+     generation: O(1) recurrence; test_sac.py checks parallel == recurrent
+```
+Compute per training token, as printed by `train.py`: **sac 5.4 MFLOP (5.45 at T=4096)**, fgpt 22.5 (46 at T=4096), GPT 29.9. The memory tables hold 34M of sac's 36M parameters (536M for `sac_m1m`) but cost ~0.05 MFLOP to read.
+
+Honest limits: with dense AdamW, memory slots still cost optimizer bandwidth per step (`scale.sh` measures it). Product-key memories can underuse slots early on, and a 45 s budget may be too short to fill a 1M-slot memory.
+
+---
+
+# Earlier design: SGHM
+
 
 ## 0. Challenge the premise first
 

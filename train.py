@@ -13,7 +13,8 @@ env:   BATCH, SEQ, LR    override the model's defaults (LR scales with sqrt(BATC
        OPT=muon          Muon for hidden weight matrices + AdamW for the rest (MUON_LR, default 0.03)
        TIME_BUDGET=<s>   train for this many seconds (LR schedule follows time); [steps] becomes a cap
        RUN_NAME=<name>   results file name (default: the model name)
-       SEED=<n>          random seed (default 1337);  CFG='{"L":5}' overrides FGPT preset fields
+       SEED=<n>          random seed (default 1337);  CFG='{"L":5}' overrides FGPT/SAC preset fields
+       PKM_LR_MULT=1     LR multiplier for sparse memory tables (no weight decay on them)
 """
 import json, math, os, queue, sys, threading, time
 import numpy as np
@@ -209,10 +210,13 @@ def main():
     named = list(model.named_parameters())
     muon = [p for n, p in named if OPT == "muon" and is_muon_param(n, p)]
     rest = [(n, p) for n, p in named if not any(p is q for q in muon)]
-    decay = [p for n, p in rest if p.dim() >= 2]
-    other = [p for n, p in rest if p.dim() < 2]
-    opt = torch.optim.AdamW([{"params": decay, "weight_decay": 0.1}, {"params": other, "weight_decay": 0.0}],
-                            lr=LR, betas=(0.9, 0.95), **({"fused": True} if CUDA else {}))
+    sparse = [p for n, p in rest if "pkm" in n]   # memory slots: decaying untouched slots would erase them
+    decay = [p for n, p in rest if p.dim() >= 2 and "pkm" not in n]
+    other = [p for n, p in rest if p.dim() < 2 and "pkm" not in n]
+    groups = [{"params": decay, "weight_decay": 0.1}, {"params": other, "weight_decay": 0.0}]
+    if sparse:
+        groups.append({"params": sparse, "weight_decay": 0.0, "lr": LR * float(os.environ.get("PKM_LR_MULT", 1))})
+    opt = torch.optim.AdamW(groups, lr=LR, betas=(0.9, 0.95), **({"fused": True} if CUDA else {}))
     if muon:
         opt = Combined(opt, Muon(muon, lr=float(os.environ.get("MUON_LR", 0.03))))
     for gr in opt.param_groups:

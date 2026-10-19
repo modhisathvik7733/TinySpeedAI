@@ -41,8 +41,8 @@ class Muon(torch.optim.Optimizer):
 
 
 def is_muon_param(name, p):
-    """Hidden weight matrices only: not embeddings, output heads, conv taps or norm gains."""
-    return p.dim() == 2 and min(p.shape) >= 32 and not any(k in name for k in ("emb", "head"))
+    """Hidden weight matrices only: not embeddings, output heads, sparse memory tables, conv taps or norm gains."""
+    return p.dim() == 2 and min(p.shape) >= 32 and not any(k in name for k in ("emb", "head", "pkm"))
 
 
 class Combined:
