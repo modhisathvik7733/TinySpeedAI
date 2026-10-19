@@ -10,15 +10,18 @@ per-token compute in three ways:
      by P while its parameters are not. Attention is over T/P positions, so long context is cheap too.
   2. Thin token stream. A narrow (d << D) per-token stream adds the patch context back to every token and
      resolves the within-patch detail with causal gated short convolutions (fused shift-adds, no cuDNN).
-  3. Factorised output. The 4096-way softmax is the single largest per-token cost (and ~30 KB/token of
-     logits traffic). Tokens are mapped to (class, member) codes by frequency rank and predicted as
-     p(token) = p(class | h) * p(member | h, class): two 64-way softmaxes, exact likelihood, ~60x cheaper.
+  3. Adaptive softmax. The 4096-way softmax is the largest per-token cost (and ~30 KB/token of logits
+     traffic). Every position scores only the 1024 most frequent tokens plus a "tail" slot; the other
+     3072 are scored only where the target is one of them (~8% of positions). Exact likelihood, every
+     token keeps its own output vector, ~3x cheaper than the full softmax.
+     (v1 used a class x member factorisation with a shared member layer: fast, but it could not tell
+     rare tokens apart - content-token loss ~7.5 nats - so it was replaced.)
 
 Causality: tokens of patch k see the backbone output of patch k-1 (which summarises tokens < kP) plus
 the causal token stream, so no token ever sees its own future (checked by test_causal.py).
 
 Prior art: MegaByte (Yu et al. 2023) and Block Transformer (Ho et al. 2024) use the global-patch /
-local-token split; class-factorised softmax goes back to Goodman 2001 / Mikolov 2011.
+local-token split; adaptive softmax is Grave et al. 2017.
 """
 import math
 import torch
@@ -27,11 +30,11 @@ import torch.nn.functional as F
 
 # name -> config. Analytic forward multiply-adds per token are printed by train.py (macs_per_token).
 PRESETS = {
-    # ~0.30M MACs/token (~1.8 MFLOP/token training), ~4M params: the >=10M tok/s target on an RTX 5060 Ti
+    # 2.2 MFLOP/token training, 4.3M params (v1 head: 8.5M tok/s measured on an RTX 5060 Ti; ~7M expected now)
     "hpt":   dict(d=64,  P=16, D=256, L=4,  heads=4,  tok_layers=2, K=8, lr=4e-3),
-    # ~0.15M MACs/token: headroom if the 5060 Ti lands under 10M with "hpt"
+    # 1.4 MFLOP/token, 2.5M params: the >=10M tok/s preset on an RTX 5060 Ti
     "hpt_xxs": dict(d=48, P=16, D=192, L=4, heads=3,  tok_layers=2, K=8, lr=5e-3),
-    # ~0.9M MACs/token, ~12M params: more quality, ~3-4M tok/s on a 5060 Ti
+    # 6.0 MFLOP/token, 12.7M params: more quality, ~3.5M tok/s on a 5060 Ti
     "hpt_s": dict(d=96,  P=16, D=384, L=6,  heads=6,  tok_layers=2, K=8, lr=3e-3),
     # scaling presets for bigger GPUs / more data (same code path, only widths change)
     "hpt_m": dict(d=128, P=8,  D=768, L=12, heads=12, tok_layers=2, K=8, lr=1.5e-3),
@@ -108,50 +111,63 @@ class TokMix(nn.Module):
         return x + self.down(F.relu(self.up(self.n2(x))).square())
 
 
-class FactorHead(nn.Module):
-    """p(token) = p(class | h) * p(member | h, class), each a small softmax. Exact, normalised likelihood."""
+class AdaptiveHead(nn.Module):
+    """Exact two-level softmax (Grave et al. 2017). Every position scores the n_head most frequent tokens
+    plus one "tail" slot; the rare tail is scored only at positions whose target is rare (~8% on
+    TinyStories). Every token keeps its own output vector, so the head stays as expressive as a full
+    softmax at a fraction of its cost."""
 
-    def __init__(self, d, vocab, n_lo=64):
+    def __init__(self, d, vocab, n_head=1024):
         super().__init__()
-        self.n_lo, self.n_hi, self.V = n_lo, math.ceil(vocab / n_lo), vocab
+        self.V, self.n_head = vocab, min(n_head, vocab)
+        self.n_tail = vocab - self.n_head
+        self.tail_frac = 0.1                                       # updated by set_code_order
         self.norm = Norm(d)
-        self.hi = nn.Linear(d, self.n_hi, bias=False)
-        self.cls = nn.Embedding(self.n_hi, d)
-        self.lo_in = nn.Linear(d, d, bias=False)
-        self.lo = nn.Linear(d, n_lo, bias=False)
-        # code = class * n_lo + member; set from token frequencies by set_code_order (frequency binning)
-        self.register_buffer("tok2code", torch.arange(vocab), persistent=True)
+        self.head = nn.Linear(d, self.n_head + (1 if self.n_tail else 0), bias=False)
+        self.tail = nn.Linear(d, self.n_tail, bias=False) if self.n_tail else None
+        # rank = position in frequency order; ranks < n_head are head tokens
+        self.register_buffer("tok2rank", torch.arange(vocab), persistent=True)
 
     def set_code_order(self, counts):
-        rank = torch.argsort(torch.as_tensor(counts, dtype=torch.float64), descending=True)
-        t2c = torch.empty(self.V, dtype=torch.long)
-        t2c[rank] = torch.arange(self.V)
-        self.tok2code.copy_(t2c.to(self.tok2code.device))
+        counts = torch.as_tensor(counts, dtype=torch.float64)
+        rank = torch.argsort(counts, descending=True)
+        t2r = torch.empty(self.V, dtype=torch.long)
+        t2r[rank] = torch.arange(self.V)
+        self.tok2rank.copy_(t2r.to(self.tok2rank.device))
+        self.tail_frac = float(counts[rank[self.n_head:]].sum() / counts.sum().clamp(min=1))
 
     def nll(self, h, y):  # h: ...,d ; y: ... -> per-token nll
         h = self.norm(h)
-        code = self.tok2code[y]
-        hi, lo = code // self.n_lo, code % self.n_lo
-        lh = self.hi(h).float()
-        ll = self.lo(F.silu(self.lo_in(h) + self.cls(hi).to(h.dtype))).float()
-        return (F.cross_entropy(lh.reshape(-1, self.n_hi), hi.reshape(-1), reduction="none")
-                + F.cross_entropy(ll.reshape(-1, self.n_lo), lo.reshape(-1), reduction="none")).view(y.shape)
+        r = self.tok2rank[y]
+        lh = self.head(h).float()
+        if not self.n_tail:
+            return F.cross_entropy(lh.reshape(-1, self.n_head), r.reshape(-1), reduction="none").view(y.shape)
+        tail = r >= self.n_head
+        nll = F.cross_entropy(lh.reshape(-1, self.n_head + 1), torch.where(tail, self.n_head, r).reshape(-1),
+                              reduction="none").view(y.shape)
+        return nll + self._tail_nll(h, r, tail)
 
-    def logprobs(self, h):  # h: B,d -> B,V full log-distribution (used for sampling only)
+    @torch.compiler.disable  # data-dependent subset of positions: run eagerly, outside the compiled graph
+    def _tail_nll(self, h, r, tail):
+        idx = tail.nonzero(as_tuple=True)
+        lt = self.tail(h[idx]).float()
+        ce = F.cross_entropy(lt, r[idx] - self.n_head, reduction="none")
+        return torch.zeros(r.shape, device=h.device, dtype=ce.dtype).index_put(idx, ce)
+
+    def logprobs(self, h):  # h: B,d -> B,V full log-distribution (used for sampling)
         h = self.norm(h)
-        lh = F.log_softmax(self.hi(h).float(), -1)                                        # B,n_hi
-        z = F.silu(self.lo_in(h).unsqueeze(1) + self.cls.weight.to(h.dtype).unsqueeze(0))  # B,n_hi,d
-        ll = F.log_softmax(self.lo(z).float(), -1)                                         # B,n_hi,n_lo
-        joint = (lh.unsqueeze(-1) + ll).flatten(1)
-        return joint[:, self.tok2code]
+        lh = F.log_softmax(self.head(h).float(), -1)
+        if self.n_tail:
+            lh = torch.cat([lh[:, :-1], lh[:, -1:] + F.log_softmax(self.tail(h).float(), -1)], -1)
+        return lh[:, self.tok2rank]
 
     def macs(self, d):
-        return d * self.n_hi + d * d + d * self.n_lo
+        return d * (self.n_head + 1) + self.tail_frac * d * self.n_tail
 
 
 class HPT(nn.Module):
     def __init__(self, vocab, d=64, P=16, D=256, L=4, heads=4, tok_layers=2, K=8, lr=4e-3,
-                 train_seq=1024, train_batch=128):
+                 n_head=1024, train_seq=1024, train_batch=128):
         super().__init__()
         self.d, self.P, self.D, self.L = d, P, D, L
         self.base_lr, self.train_seq, self.train_batch = lr, train_seq, train_batch
@@ -163,20 +179,22 @@ class HPT(nn.Module):
         self.bos = nn.Parameter(torch.zeros(D))           # context for the first patch
         self.dec = nn.Linear(D, P * d, bias=False)        # patch context -> one vector per position in the next patch
         self.tok = nn.ModuleList([TokMix(d, K) for _ in range(tok_layers)])
-        self.head = FactorHead(d, vocab)
+        self.head = AdaptiveHead(d, vocab, n_head)
         self.hd = D // heads
         self._init(L + tok_layers)
 
     def _init(self, depth):
         for n, p in self.named_parameters():
-            if p.dim() == 2 and not n.endswith("tok2code"):
+            if p.dim() == 2:
                 nn.init.normal_(p, std=0.02)
         nn.init.normal_(self.emb.weight, std=1.0)
         for b in self.blocks:                             # zero-init residual outputs: stable at any depth
             nn.init.zeros_(b.o.weight); nn.init.zeros_(b.down.weight)
         for t in self.tok:
             nn.init.zeros_(t.out.weight); nn.init.zeros_(t.down.weight)
-        nn.init.zeros_(self.head.hi.weight); nn.init.zeros_(self.head.lo.weight)
+        nn.init.zeros_(self.head.head.weight)
+        if self.head.tail is not None:
+            nn.init.zeros_(self.head.tail.weight)
 
     def set_code_order(self, counts):
         self.head.set_code_order(counts)

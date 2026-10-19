@@ -1,11 +1,11 @@
 """Check HPT: no position sees its future (across and inside patches), and the factorised head is an exact
-normalised distribution whose sampling log-probs match the training loss."""
+normalised distribution (head + rare tail) whose sampling log-probs match the training loss."""
 import torch
 from hpt import HPT
 
 torch.manual_seed(0)
 V, T = 300, 64
-m = HPT(V, d=32, P=8, D=64, L=2, heads=2).eval()
+m = HPT(V, d=32, P=8, D=64, L=2, heads=2, n_head=64).eval()   # small head: exercises the tail
 with torch.no_grad():                       # zero-initialised outputs would make the test vacuous
     for p in m.parameters():
         if p.dim() == 2 and p.abs().sum() == 0:
@@ -25,11 +25,12 @@ with torch.no_grad():
     assert worst == 0.0, worst
 
     lp = m.head.logprobs(h[:, -1])                                  # B,V
-    print(f"sum of p over vocab = {lp.exp().sum(-1).tolist()} (<=1: padded codes hold the rest)")
-    assert (lp.exp().sum(-1) <= 1 + 1e-5).all()
-    y = torch.randint(0, V, (2,))
-    nll = m.head.nll(h[:, -1:], y[:, None])[:, 0]
-    err = (nll + lp.gather(1, y[:, None])[:, 0]).abs().max().item()
+    tot = lp.exp().sum(-1)
+    print(f"sum of p over vocab = {tot.tolist()}")
+    assert ((tot - 1).abs() < 1e-4).all()
+    ys = torch.arange(V)                                             # every token: head and tail ranks
+    nll = m.head.nll(h[:, -1:].expand(2, V, -1), ys.expand(2, V))   # B,V
+    err = (nll + lp).abs().max().item()
     print(f"max |train nll - sampling nll| = {err:.1e}")
     assert err < 1e-4, err
     odd = m.hidden(idx[:, :37])                                      # length not a multiple of P

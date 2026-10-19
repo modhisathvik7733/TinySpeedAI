@@ -8,18 +8,18 @@ A dense model costs about 6 × params FLOPs per training token. The GPT and SGHM
 
 1. **Patch backbone.** Every P=16 tokens are folded into one patch vector. A standard transformer (RoPE, QK-norm, flash attention, relu² MLP) runs over the patches only, so its cost per token is divided by P while its parameter count is not. Attention spans T/P positions, so long context is cheap.
 2. **Thin token stream.** A narrow per-token stream (d=64) adds the patch context back to every token. Causal gated short convolutions resolve the detail inside each patch.
-3. **Factorised softmax.** p(token) = p(class) · p(member | class), two 64-way softmaxes instead of one 4096-way softmax. The likelihood stays exact, at about 60× less head compute and logit traffic.
+3. **Adaptive softmax.** Every position scores only the 1024 most frequent tokens (91.6% of the text) plus a "tail" slot. The other 3072 tokens are scored only where the target is one of them. The likelihood stays exact, and every token keeps its own output vector.
 
-| preset | params | MFLOP/token | expected tok/s, 5060 Ti | use |
+| preset | params | MFLOP/token | tok/s, 5060 Ti | use |
 |---|---|---|---|---|
-| `hpt_xxs` | 2.3M | 1.0 | ~15–20M | maximum speed |
-| `hpt` | 4.0M | 1.8 | **~10M** (target) | default |
-| `hpt_s` | 12.4M | 5.4 | ~3–4M | more quality |
-| `hpt_m` | 87M | 67 | (bigger GPU) | scaling |
-| `hpt_l` | 688M | 527 | (multi-GPU) | scaling |
+| `hpt_xxs` | 2.5M | 1.4 | ~10M (expected) | maximum speed |
+| `hpt` | 4.3M | 2.2 | ~7M (expected) | default |
+| `hpt_s` | 12.7M | 6.0 | ~3.5M (expected) | more quality |
+| `hpt_m` | 88M | 68 | (bigger GPU) | scaling |
+| `hpt_l` | 689M | 528 | (multi-GPU) | scaling |
 | `gpt` (baseline) | 5.0M | 30 | 0.71M (measured) | |
 
-The tok/s figures are estimates from the FLOP count. Run `bench` below to get real numbers on your GPU. The log prints the achieved TFLOPS. If it is far below about 20, the run is overhead-bound: try `COMPILE_MODE=max-autotune-no-cudagraphs` or a bigger `BATCH`.
+The HPT tok/s figures are projected from the FLOP count and the TFLOPS measured with the first version of the head. Run `bench` below to get real numbers on your GPU. The log prints the achieved TFLOPS. If it is far below about 20, the run is overhead-bound: try `COMPILE_MODE=max-autotune-no-cudagraphs` or a bigger `BATCH`.
 
 **Scaling to large data and large models:**
 - `prepare.py all` tokenizes the full dataset in streaming chunks, with flat memory use.
@@ -30,7 +30,7 @@ The tok/s figures are estimates from the FLOP count. Run `bench` below to get re
 
 `test_causal.py` checks two things: no position sees its own future, and the factorised head gives an exact distribution.
 
-Prior art: MegaByte (2023) and Block Transformer (2024) use the same global-patch / local-token split. Class-factorised softmax dates to Goodman (2001) and Mikolov (2011).
+Prior art: MegaByte (2023) and Block Transformer (2024) use the same global-patch / local-token split. Adaptive softmax is from Grave et al. (2017).
 
 ## Run on a GPU (vast.ai RTX 5060 Ti, `pytorch_cuda-12.8` image)
 
