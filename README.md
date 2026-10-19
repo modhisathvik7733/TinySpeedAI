@@ -2,6 +2,18 @@
 
 Small language models on TinyStories, built for **training tokens per second**.
 
+## Non-transformer architectures from papers (`rnn.py`)
+
+Same skeleton as the GPT baseline (d=256, 5 blocks, 4× MLP, tied embeddings, AdamW). Only the token mixer is swapped for a fixed-state recurrent / linear-memory layer:
+- `rnn_mingru`: minGRU (Feng et al. 2024), pure PyTorch
+- `rnn_gdn`: Gated DeltaNet (ICLR 2025)
+- `rnn_hgrn2`: HGRN2 (COLM 2024)
+- `rnn_gla`: Gated Linear Attention (ICML 2024)
+- `rnn_retnet`: RetNet (2023)
+- `rnn_mamba2`: Mamba-2 (ICML 2024)
+
+The last five need `pip install flash-linear-attention einops`. `python test_rnn.py` checks which ones run on your GPU.
+
 ## RCM: Reservoir Cortex Model (`res.py`, newest experiment)
 
 RCM trains in **one streaming pass with no backpropagation**, the way reservoir computing does:
@@ -54,6 +66,7 @@ The RTX 50-series (sm_120) needs a PyTorch build for CUDA 12.8 or newer. If you 
 ## Files
 | file | what it does |
 |---|---|
+| `rnn.py` | minGRU, Gated DeltaNet, HGRN2, GLA, RetNet, Mamba-2 in the GPT-baseline skeleton |
 | `res.py` | RCM: backprop-free reservoir LM (one pass + ridge solve) |
 | `sac.py` | the SAC model, presets and ablations |
 | `fgpt.py`, `hpt.py` | earlier experiments: tuned GPT, patch transformer |

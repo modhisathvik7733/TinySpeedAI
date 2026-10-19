@@ -243,6 +243,9 @@ def build(name, vocab):
     if name.startswith("hpt"):
         from hpt import build_hpt
         return build_hpt(name, vocab)
+    if name.startswith("rnn_"):
+        from rnn import build_rnn
+        return build_rnn(name, vocab)
     if name.startswith("sac"):
         from sac import build_sac
         return build_sac(name, vocab)
