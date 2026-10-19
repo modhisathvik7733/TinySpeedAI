@@ -239,12 +239,19 @@ class GPT(nn.Module):
 
 
 def build(name, vocab):
+    """Returns a model carrying its training defaults: train_seq, train_batch, base_lr (at train_batch)."""
+    if name.startswith("hpt"):
+        from hpt import build_hpt
+        return build_hpt(name, vocab)
     if name == "gpt":
-        return GPT(vocab)
-    if name == "sghm":
-        return SGHM(vocab)
-    if name == "sghm_nogate":
-        return SGHM(vocab, gate_mode="always")
-    if name == "sghm_nomem":
-        return SGHM(vocab, use_mem=False)
-    raise ValueError(name)
+        m = GPT(vocab)
+    elif name == "sghm":
+        m = SGHM(vocab)
+    elif name == "sghm_nogate":
+        m = SGHM(vocab, gate_mode="always")
+    elif name == "sghm_nomem":
+        m = SGHM(vocab, use_mem=False)
+    else:
+        raise ValueError(name)
+    m.train_seq, m.train_batch, m.base_lr = 256, 128, 4e-3
+    return m
