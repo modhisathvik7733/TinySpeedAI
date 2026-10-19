@@ -2,7 +2,15 @@
 
 Small language models on TinyStories, built for **training tokens per second**.
 
-## SAC: Sparse Associative Cortex (`sac.py`, the current model)
+## RCM: Reservoir Cortex Model (`res.py`, newest experiment)
+
+RCM trains in **one streaming pass with no backpropagation**, the way reservoir computing does:
+- **Fixed parts:** token embeddings computed in closed form from data statistics, leaky traces at 8 time-scales as fixed-size context memory, and a copy rule that recalls what followed the last occurrence of the current token or token pair.
+- **Learned part:** only the linear readout, by one ridge-regression solve over statistics that add up across data shards and GPUs. Four scalars are then calibrated on held-out text to turn scores into probabilities.
+- **What it doesn't need:** epochs, gradients or a learning rate.
+- **Run:** `python res.py sr_res 45` trains within a 45 s budget, with the solve included in the time. `test_res.py` checks the parallel parts against brute force.
+
+## SAC: Sparse Associative Cortex (`sac.py`)
 
 SAC is a language model without attention and without a KV cache, where most of the network does not fire on any given token. Design and reasoning: [DESIGN.md](DESIGN.md).
 - **Episodic memory:** a fixed-size fast-weight state per head, written only when the model is surprised. It binds names and objects within the context, and its cost per token does not depend on context length.
@@ -46,6 +54,7 @@ The RTX 50-series (sm_120) needs a PyTorch build for CUDA 12.8 or newer. If you 
 ## Files
 | file | what it does |
 |---|---|
+| `res.py` | RCM: backprop-free reservoir LM (one pass + ridge solve) |
 | `sac.py` | the SAC model, presets and ablations |
 | `fgpt.py`, `hpt.py` | earlier experiments: tuned GPT, patch transformer |
 | `optim.py` | Muon optimizer |
