@@ -1,0 +1,438 @@
+{
+ "model": "sghm",
+ "params": 5381258,
+ "steps": 1000,
+ "tokens": 8192000,
+ "train_time_s": 258.8132028579712,
+ "tok_per_s": 31652.171950808555,
+ "eval_T256": {
+  "loss": 2.3427013397216796,
+  "repeat_content_loss": 4.514763466981228,
+  "novel_content_loss": 4.670968359259209
+ },
+ "eval_T1024": {
+  "loss": 2.3584620634714764,
+  "repeat_content_loss": 4.661553551471829,
+  "novel_content_loss": 4.680272731870014,
+  "loss_beyond_256": 2.36218654844496
+ },
+ "sample": "Once upon a time, there was a little girl named Lily. She had many friends who were very good.\nOne day, Lily went to the park with her mom and dad. She liked to help her mom in the park.\nAt the park, Lily saw a little girl named Sue. She was playing with her toy Mia and her toy car, making a big, scary monster. Sue said, \"Hi, I like my toy car! Can I play with you and the toy?\" Sue smiled and said, \"Yes, you can play with it too.\" Sue and Sue thought about it and decided to take the toy back. He pushed the toy around and started to dance. Lily felt good because she could help her mom and dad play with the toy. Sue, her mom, and her mom went",
+ "sample2": "Lily and Max went to the park. Lily found a big, yummy treat on the table. Lily picked up a big, yummy cake with the cake. Lily did not know the cake was inside.\nTom asked his mom to help her.\n\"Mommy, I got my sandwich!\" she said. \"You need to give it to me. You do a good thing. You can make them feel better.\"\nTom did not want to share her toys with Lily. He was not happy with her fort. She felt a little better, but she was happy she could help. She went to her mom and went outside to play. They played on the swings and the slide. They did not want to play anymore. They had so much fun.\nBut then they heard a noise. It was a toy. It was not a toy.",
+ "log": [
+  {
+   "step": 100,
+   "time": 24.350687980651855,
+   "tokens": 819200,
+   "loss": 3.712674617767334,
+   "local_loss": 3.852642297744751,
+   "write_frac": 0.67822265625,
+   "g_mean": 0.6740742325782776
+  },
+  {
+   "step": 200,
+   "time": 50.09315896034241,
+   "tokens": 1638400,
+   "loss": 3.092916488647461,
+   "local_loss": 3.404296398162842,
+   "write_frac": 0.6285400390625,
+   "g_mean": 0.6351354718208313
+  },
+  {
+   "step": 300,
+   "time": 76.36445498466492,
+   "tokens": 2457600,
+   "loss": 2.768143653869629,
+   "local_loss": 3.1762194633483887,
+   "write_frac": 0.601318359375,
+   "g_mean": 0.6134693622589111
+  },
+  {
+   "step": 400,
+   "time": 102.38494992256165,
+   "tokens": 3276800,
+   "loss": 2.6060338020324707,
+   "local_loss": 3.0748250484466553,
+   "write_frac": 0.588623046875,
+   "g_mean": 0.6019099950790405
+  },
+  {
+   "step": 500,
+   "time": 128.20891499519348,
+   "tokens": 4096000,
+   "loss": 2.624377727508545,
+   "local_loss": 3.113952159881592,
+   "write_frac": 0.578369140625,
+   "g_mean": 0.595736026763916,
+   "val": 2.589606833457947
+  },
+  {
+   "step": 600,
+   "time": 155.24102091789246,
+   "tokens": 4915200,
+   "loss": 2.4193224906921387,
+   "local_loss": 2.93865966796875,
+   "write_frac": 0.5423583984375,
+   "g_mean": 0.5712769031524658
+  },
+  {
+   "step": 700,
+   "time": 181.40599393844604,
+   "tokens": 5734400,
+   "loss": 2.409656524658203,
+   "local_loss": 2.9405136108398438,
+   "write_frac": 0.5445556640625,
+   "g_mean": 0.5687977075576782
+  },
+  {
+   "step": 800,
+   "time": 207.43718099594116,
+   "tokens": 6553600,
+   "loss": 2.393233060836792,
+   "local_loss": 2.9619739055633545,
+   "write_frac": 0.5382080078125,
+   "g_mean": 0.5661132335662842
+  },
+  {
+   "step": 900,
+   "time": 232.65731501579285,
+   "tokens": 7372800,
+   "loss": 2.314357280731201,
+   "local_loss": 2.916635274887085,
+   "write_frac": 0.516845703125,
+   "g_mean": 0.5586632490158081
+  },
+  {
+   "step": 1000,
+   "time": 257.8443570137024,
+   "tokens": 8192000,
+   "loss": 2.389597177505493,
+   "local_loss": 2.957063913345337,
+   "write_frac": 0.5302734375,
+   "g_mean": 0.5608112812042236,
+   "val": 2.3583062887191772
+  }
+ ],
+ "gate_trace": [
+  [
+   "Once",
+   0.99
+  ],
+  [
+   " upon",
+   0.24
+  ],
+  [
+   " a",
+   0.23
+  ],
+  [
+   " time",
+   0.23
+  ],
+  [
+   ",",
+   0.24
+  ],
+  [
+   " there",
+   0.26
+  ],
+  [
+   " was",
+   0.23
+  ],
+  [
+   " a",
+   0.23
+  ],
+  [
+   " little",
+   0.34
+  ],
+  [
+   " girl",
+   0.33
+  ],
+  [
+   " named",
+   0.25
+  ],
+  [
+   " Lily",
+   0.35
+  ],
+  [
+   ".",
+   0.27
+  ],
+  [
+   " She",
+   0.28
+  ],
+  [
+   " had",
+   0.4
+  ],
+  [
+   " many",
+   0.59
+  ],
+  [
+   " friends",
+   0.38
+  ],
+  [
+   " who",
+   0.42
+  ],
+  [
+   " were",
+   0.69
+  ],
+  [
+   " very",
+   0.66
+  ],
+  [
+   " good",
+   0.83
+  ],
+  [
+   ".",
+   0.4
+  ],
+  [
+   "\n",
+   0.47
+  ],
+  [
+   "One",
+   0.43
+  ],
+  [
+   " day",
+   0.24
+  ],
+  [
+   ",",
+   0.23
+  ],
+  [
+   " Lily",
+   0.6
+  ],
+  [
+   " went",
+   0.55
+  ],
+  [
+   " to",
+   0.27
+  ],
+  [
+   " the",
+   0.27
+  ],
+  [
+   " park",
+   0.32
+  ],
+  [
+   " with",
+   0.37
+  ],
+  [
+   " her",
+   0.4
+  ],
+  [
+   " mom",
+   0.35
+  ],
+  [
+   " and",
+   0.43
+  ],
+  [
+   " dad",
+   0.24
+  ],
+  [
+   ".",
+   0.3
+  ],
+  [
+   " She",
+   0.47
+  ],
+  [
+   " liked",
+   0.68
+  ],
+  [
+   " to",
+   0.25
+  ],
+  [
+   " help",
+   0.68
+  ],
+  [
+   " her",
+   0.42
+  ],
+  [
+   " mom",
+   0.45
+  ],
+  [
+   " in",
+   0.47
+  ],
+  [
+   " the",
+   0.29
+  ],
+  [
+   " park",
+   0.62
+  ],
+  [
+   ".",
+   0.26
+  ],
+  [
+   "\n",
+   0.54
+  ],
+  [
+   "At",
+   0.61
+  ],
+  [
+   " the",
+   0.26
+  ],
+  [
+   " park",
+   0.4
+  ],
+  [
+   ",",
+   0.23
+  ],
+  [
+   " Lily",
+   0.53
+  ],
+  [
+   " saw",
+   0.3
+  ],
+  [
+   " a",
+   0.26
+  ],
+  [
+   " little",
+   0.49
+  ],
+  [
+   " girl",
+   0.34
+  ],
+  [
+   " named",
+   0.33
+  ],
+  [
+   " Sue",
+   0.42
+  ],
+  [
+   ".",
+   0.28
+  ],
+  [
+   " She",
+   0.46
+  ],
+  [
+   " was",
+   0.46
+  ],
+  [
+   " playing",
+   0.79
+  ],
+  [
+   " with",
+   0.3
+  ],
+  [
+   " her",
+   0.29
+  ],
+  [
+   " toy",
+   0.46
+  ],
+  [
+   " Mia",
+   0.96
+  ],
+  [
+   " and",
+   0.74
+  ],
+  [
+   " her",
+   0.37
+  ],
+  [
+   " toy",
+   0.76
+  ],
+  [
+   " car",
+   0.35
+  ],
+  [
+   ",",
+   0.72
+  ],
+  [
+   " making",
+   0.85
+  ],
+  [
+   " a",
+   0.46
+  ],
+  [
+   " big",
+   0.43
+  ],
+  [
+   ",",
+   0.58
+  ],
+  [
+   " scary",
+   0.72
+  ],
+  [
+   " monster",
+   0.48
+  ],
+  [
+   ".",
+   0.36
+  ],
+  [
+   " Sue",
+   0.88
+  ]
+ ],
+ "gen_write_frac": 0.4049079754601227
+}

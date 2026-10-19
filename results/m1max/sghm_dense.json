@@ -1,0 +1,438 @@
+{
+ "model": "sghm_dense",
+ "params": 5381258,
+ "steps": 1000,
+ "tokens": 8192000,
+ "train_time_s": 259.3491132259369,
+ "tok_per_s": 31586.766957106902,
+ "eval_T256": {
+  "loss": 2.1971428553263346,
+  "repeat_content_loss": 4.054259891100108,
+  "novel_content_loss": 4.530649895251573
+ },
+ "eval_T1024": {
+  "loss": 2.1891331831614176,
+  "repeat_content_loss": 4.247776579166342,
+  "novel_content_loss": 4.511460313017462,
+  "loss_beyond_256": 2.182996718088786
+ },
+ "sample": "Once upon a time, there was a little girl named Lily. She had an amazing toy. It was soft and round. \nOne day, Lily put on the blue car outside to find a small box. She saw a little girl named Sue. Sue was surprised and wanted to help.\nSue said, \"Max, let me get the box from here.\" So, Lily and her mom took the box home and told Lily, \"I want to find the star!\" Sue said, \"Let's open it and see what happens!\"\nLily and her mom went to the summer place. They found the black box inside. Lily was so happy and proud. The two kids played with the star and the star. Lily and her mom was happy to have made the magic bell.Once upon",
+ "sample2": "Lily and Max went to the park. Lily found a big, round spot in the park. She liked to climb it and climb up. Max was very happy with Lily. He threw the hole from the branch, laughing. He was happy and ready to splash. Lily took a deep breath and went outside to show Max.Once there was a little girl called Charlie. She lived in a small house with her mom and dad. They liked to play and explore. One day, Loric went on a walk to find a big party. \nAs she walked, she noticed a big, red bug up into the tree. She ran to get it from the tree. She walked over to it and said, \"Hello, I am a magic bug!\"\nBlue was so excited she had been so careful. She held",
+ "log": [
+  {
+   "step": 100,
+   "time": 23.620184183120728,
+   "tokens": 819200,
+   "loss": 3.7610228061676025,
+   "local_loss": 3.9012093544006348,
+   "write_frac": 0.6878662109375,
+   "g_mean": 0.6813733577728271
+  },
+  {
+   "step": 200,
+   "time": 48.99015712738037,
+   "tokens": 1638400,
+   "loss": 3.097935199737549,
+   "local_loss": 3.433896064758301,
+   "write_frac": 0.641357421875,
+   "g_mean": 0.6438735723495483
+  },
+  {
+   "step": 300,
+   "time": 74.12334728240967,
+   "tokens": 2457600,
+   "loss": 2.728243350982666,
+   "local_loss": 3.2160511016845703,
+   "write_frac": 0.635498046875,
+   "g_mean": 0.6356829404830933
+  },
+  {
+   "step": 400,
+   "time": 99.04651212692261,
+   "tokens": 3276800,
+   "loss": 2.559647560119629,
+   "local_loss": 3.1155471801757812,
+   "write_frac": 0.64208984375,
+   "g_mean": 0.6327821016311646
+  },
+  {
+   "step": 500,
+   "time": 124.97350716590881,
+   "tokens": 4096000,
+   "loss": 2.5454301834106445,
+   "local_loss": 3.1517202854156494,
+   "write_frac": 0.642578125,
+   "g_mean": 0.6374163627624512,
+   "val": 2.4891535520553587
+  },
+  {
+   "step": 600,
+   "time": 151.49727725982666,
+   "tokens": 4915200,
+   "loss": 2.3006503582000732,
+   "local_loss": 2.9681525230407715,
+   "write_frac": 0.63671875,
+   "g_mean": 0.6253765821456909
+  },
+  {
+   "step": 700,
+   "time": 176.825049161911,
+   "tokens": 5734400,
+   "loss": 2.2707009315490723,
+   "local_loss": 2.982919454574585,
+   "write_frac": 0.6474609375,
+   "g_mean": 0.6287065148353577
+  },
+  {
+   "step": 800,
+   "time": 203.06567215919495,
+   "tokens": 6553600,
+   "loss": 2.2625346183776855,
+   "local_loss": 3.0019638538360596,
+   "write_frac": 0.656005859375,
+   "g_mean": 0.6307319402694702
+  },
+  {
+   "step": 900,
+   "time": 230.60717630386353,
+   "tokens": 7372800,
+   "loss": 2.1826887130737305,
+   "local_loss": 2.9455037117004395,
+   "write_frac": 0.6456298828125,
+   "g_mean": 0.6249247789382935
+  },
+  {
+   "step": 1000,
+   "time": 258.4013330936432,
+   "tokens": 8192000,
+   "loss": 2.246708869934082,
+   "local_loss": 2.9847373962402344,
+   "write_frac": 0.652099609375,
+   "g_mean": 0.6275640726089478,
+   "val": 2.2100611209869383
+  }
+ ],
+ "gate_trace": [
+  [
+   "Once",
+   0.99
+  ],
+  [
+   " upon",
+   0.32
+  ],
+  [
+   " a",
+   0.31
+  ],
+  [
+   " time",
+   0.31
+  ],
+  [
+   ",",
+   0.32
+  ],
+  [
+   " there",
+   0.34
+  ],
+  [
+   " was",
+   0.31
+  ],
+  [
+   " a",
+   0.31
+  ],
+  [
+   " little",
+   0.43
+  ],
+  [
+   " girl",
+   0.42
+  ],
+  [
+   " named",
+   0.33
+  ],
+  [
+   " Lily",
+   0.45
+  ],
+  [
+   ".",
+   0.37
+  ],
+  [
+   " She",
+   0.35
+  ],
+  [
+   " had",
+   0.46
+  ],
+  [
+   " an",
+   0.6
+  ],
+  [
+   " amazing",
+   0.91
+  ],
+  [
+   " toy",
+   0.73
+  ],
+  [
+   ".",
+   0.43
+  ],
+  [
+   " It",
+   0.5
+  ],
+  [
+   " was",
+   0.38
+  ],
+  [
+   " soft",
+   0.88
+  ],
+  [
+   " and",
+   0.32
+  ],
+  [
+   " round",
+   0.73
+  ],
+  [
+   ".",
+   0.36
+  ],
+  [
+   " ",
+   0.82
+  ],
+  [
+   "\n",
+   0.31
+  ],
+  [
+   "One",
+   0.67
+  ],
+  [
+   " day",
+   0.32
+  ],
+  [
+   ",",
+   0.31
+  ],
+  [
+   " Lily",
+   0.69
+  ],
+  [
+   " put",
+   0.87
+  ],
+  [
+   " on",
+   0.45
+  ],
+  [
+   " the",
+   0.55
+  ],
+  [
+   " blue",
+   0.88
+  ],
+  [
+   " car",
+   0.68
+  ],
+  [
+   " outside",
+   0.94
+  ],
+  [
+   " to",
+   0.66
+  ],
+  [
+   " find",
+   0.8
+  ],
+  [
+   " a",
+   0.49
+  ],
+  [
+   " small",
+   0.87
+  ],
+  [
+   " box",
+   0.74
+  ],
+  [
+   ".",
+   0.41
+  ],
+  [
+   " She",
+   0.63
+  ],
+  [
+   " saw",
+   0.65
+  ],
+  [
+   " a",
+   0.38
+  ],
+  [
+   " little",
+   0.64
+  ],
+  [
+   " girl",
+   0.46
+  ],
+  [
+   " named",
+   0.38
+  ],
+  [
+   " Sue",
+   0.51
+  ],
+  [
+   ".",
+   0.36
+  ],
+  [
+   " Sue",
+   0.42
+  ],
+  [
+   " was",
+   0.45
+  ],
+  [
+   " surprised",
+   0.79
+  ],
+  [
+   " and",
+   0.53
+  ],
+  [
+   " wanted",
+   0.75
+  ],
+  [
+   " to",
+   0.33
+  ],
+  [
+   " help",
+   0.58
+  ],
+  [
+   ".",
+   0.47
+  ],
+  [
+   "\n",
+   0.54
+  ],
+  [
+   "Sue",
+   0.82
+  ],
+  [
+   " said",
+   0.67
+  ],
+  [
+   ",",
+   0.34
+  ],
+  [
+   " \"",
+   0.31
+  ],
+  [
+   "Max",
+   0.86
+  ],
+  [
+   ",",
+   0.32
+  ],
+  [
+   " let",
+   0.54
+  ],
+  [
+   " me",
+   0.73
+  ],
+  [
+   " get",
+   0.66
+  ],
+  [
+   " the",
+   0.46
+  ],
+  [
+   " box",
+   0.83
+  ],
+  [
+   " from",
+   0.87
+  ],
+  [
+   " here",
+   0.95
+  ],
+  [
+   ".\"",
+   0.61
+  ],
+  [
+   " So",
+   0.75
+  ],
+  [
+   ",",
+   0.32
+  ],
+  [
+   " Lily",
+   0.64
+  ],
+  [
+   " and",
+   0.44
+  ],
+  [
+   " her",
+   0.52
+  ],
+  [
+   " mom",
+   0.43
+  ]
+ ],
+ "gen_write_frac": 0.5766871165644172
+}

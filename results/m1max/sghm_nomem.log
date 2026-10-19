@@ -1,0 +1,33 @@
+sghm_nomem: 3.94M params on mps, 1000 steps
+step   100     12s   67.1k tok/s loss=3.705 local_loss=3.839 write_frac=0.672 g_mean=0.670
+step   200     25s   65.6k tok/s loss=3.184 local_loss=3.407 write_frac=0.582 g_mean=0.601
+step   300     38s   64.0k tok/s loss=2.899 local_loss=3.186 write_frac=0.523 g_mean=0.553
+step   400     52s   63.0k tok/s loss=2.777 local_loss=3.077 write_frac=0.474 g_mean=0.511
+step   500     66s   62.3k tok/s loss=2.761 local_loss=3.111 write_frac=0.466 g_mean=0.496 val=2.726
+step   600     79s   61.9k tok/s loss=2.559 local_loss=2.935 write_frac=0.425 g_mean=0.457
+step   700     93s   61.5k tok/s loss=2.541 local_loss=2.945 write_frac=0.417 g_mean=0.450
+step   800    106s   61.6k tok/s loss=2.555 local_loss=2.952 write_frac=0.414 g_mean=0.443
+step   900    120s   61.4k tok/s loss=2.481 local_loss=2.912 write_frac=0.396 g_mean=0.429
+step  1000    134s   60.9k tok/s loss=2.540 local_loss=2.959 write_frac=0.402 g_mean=0.433 val=2.520
+{
+ "model": "sghm_nomem",
+ "params": 3938818,
+ "steps": 1000,
+ "tokens": 8192000,
+ "train_time_s": 135.0683889389038,
+ "tok_per_s": 60650.75673409809,
+ "eval_T256": {
+  "loss": 2.5080079674720763,
+  "repeat_content_loss": 5.649660515515792,
+  "novel_content_loss": 4.767623145191783
+ },
+ "eval_T1024": {
+  "loss": 2.5234989960988363,
+  "repeat_content_loss": 5.634831519905533,
+  "novel_content_loss": 4.762740002399142,
+  "loss_beyond_256": 2.52587128745185
+ },
+ "sample": "Once upon a time, there was a big, hairy dog named Max. Spot loved to fly high in the sky. One day, while his friends came to school, they saw their mom. They were happy. They went back to the shop and the water. Finally, the cat and the dog went to the tree. The bird said, \"I don't want to go far away. I can't fly. I live on it!\"\nBen and the rabbit put the leaf on the bird. The bug was so happy and surprised! The bird said, \"Thank you, Sam!\"\nThe little girl was so happy and said, \"Thank you, Mommy! Let's do it!\" The cat was happy and said, \"Thank you, Sue!\" They played together until the sun went down.Once",
+ "sample2": "Lily and Max went to the park. Lily found a big, yummy cookie on the wall. She said, \"I have some yummy food, but I can\u2019t wait for the tree. Do you like it?\" Lily says.\nThey pet mom and dad and mom. They pet the dog and the ball. They go very fast. They look angry and sick.\"\n\"Yes. Here, please stay here!\"\nThey worked together. They learned their lesson. They made a lot of are good things. They make the best castle ever.\n\"Thank you, Max!\" Ben says. \"We were brave and brave. We can do that again.\" So, they went to the store and bought the toy. The bird was so happy to have a friend and thanked the bug. From that day on, Lily always remembered to say",
+ "gen_write_frac": 0.2085889570552147
+}

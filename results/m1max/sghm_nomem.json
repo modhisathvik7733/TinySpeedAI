@@ -1,0 +1,438 @@
+{
+ "model": "sghm_nomem",
+ "params": 3938818,
+ "steps": 1000,
+ "tokens": 8192000,
+ "train_time_s": 135.0683889389038,
+ "tok_per_s": 60650.75673409809,
+ "eval_T256": {
+  "loss": 2.5080079674720763,
+  "repeat_content_loss": 5.649660515515792,
+  "novel_content_loss": 4.767623145191783
+ },
+ "eval_T1024": {
+  "loss": 2.5234989960988363,
+  "repeat_content_loss": 5.634831519905533,
+  "novel_content_loss": 4.762740002399142,
+  "loss_beyond_256": 2.52587128745185
+ },
+ "sample": "Once upon a time, there was a big, hairy dog named Max. Spot loved to fly high in the sky. One day, while his friends came to school, they saw their mom. They were happy. They went back to the shop and the water. Finally, the cat and the dog went to the tree. The bird said, \"I don't want to go far away. I can't fly. I live on it!\"\nBen and the rabbit put the leaf on the bird. The bug was so happy and surprised! The bird said, \"Thank you, Sam!\"\nThe little girl was so happy and said, \"Thank you, Mommy! Let's do it!\" The cat was happy and said, \"Thank you, Sue!\" They played together until the sun went down.Once",
+ "sample2": "Lily and Max went to the park. Lily found a big, yummy cookie on the wall. She said, \"I have some yummy food, but I can\u2019t wait for the tree. Do you like it?\" Lily says.\nThey pet mom and dad and mom. They pet the dog and the ball. They go very fast. They look angry and sick.\"\n\"Yes. Here, please stay here!\"\nThey worked together. They learned their lesson. They made a lot of are good things. They make the best castle ever.\n\"Thank you, Max!\" Ben says. \"We were brave and brave. We can do that again.\" So, they went to the store and bought the toy. The bird was so happy to have a friend and thanked the bug. From that day on, Lily always remembered to say",
+ "log": [
+  {
+   "step": 100,
+   "time": 12.20917797088623,
+   "tokens": 819200,
+   "loss": 3.704989433288574,
+   "local_loss": 3.839444637298584,
+   "write_frac": 0.672119140625,
+   "g_mean": 0.6704388856887817
+  },
+  {
+   "step": 200,
+   "time": 24.95892906188965,
+   "tokens": 1638400,
+   "loss": 3.1835877895355225,
+   "local_loss": 3.4071714878082275,
+   "write_frac": 0.5823974609375,
+   "g_mean": 0.6006430387496948
+  },
+  {
+   "step": 300,
+   "time": 38.37587285041809,
+   "tokens": 2457600,
+   "loss": 2.8993539810180664,
+   "local_loss": 3.1859261989593506,
+   "write_frac": 0.522705078125,
+   "g_mean": 0.5526852607727051
+  },
+  {
+   "step": 400,
+   "time": 52.03268003463745,
+   "tokens": 3276800,
+   "loss": 2.7765278816223145,
+   "local_loss": 3.077289342880249,
+   "write_frac": 0.4739990234375,
+   "g_mean": 0.5109740495681763
+  },
+  {
+   "step": 500,
+   "time": 65.75631093978882,
+   "tokens": 4096000,
+   "loss": 2.7609050273895264,
+   "local_loss": 3.110872507095337,
+   "write_frac": 0.46630859375,
+   "g_mean": 0.49621403217315674,
+   "val": 2.726328420639038
+  },
+  {
+   "step": 600,
+   "time": 79.40840697288513,
+   "tokens": 4915200,
+   "loss": 2.558509349822998,
+   "local_loss": 2.9350242614746094,
+   "write_frac": 0.4246826171875,
+   "g_mean": 0.45696741342544556
+  },
+  {
+   "step": 700,
+   "time": 93.18224811553955,
+   "tokens": 5734400,
+   "loss": 2.5413172245025635,
+   "local_loss": 2.9453067779541016,
+   "write_frac": 0.4171142578125,
+   "g_mean": 0.4500492215156555
+  },
+  {
+   "step": 800,
+   "time": 106.38252305984497,
+   "tokens": 6553600,
+   "loss": 2.554636001586914,
+   "local_loss": 2.9518380165100098,
+   "write_frac": 0.4140625,
+   "g_mean": 0.44323381781578064
+  },
+  {
+   "step": 900,
+   "time": 120.03856921195984,
+   "tokens": 7372800,
+   "loss": 2.4806156158447266,
+   "local_loss": 2.91188907623291,
+   "write_frac": 0.396240234375,
+   "g_mean": 0.4292549788951874
+  },
+  {
+   "step": 1000,
+   "time": 134.42655611038208,
+   "tokens": 8192000,
+   "loss": 2.5402448177337646,
+   "local_loss": 2.9588160514831543,
+   "write_frac": 0.40234375,
+   "g_mean": 0.4330267608165741,
+   "val": 2.519921135902405
+  }
+ ],
+ "gate_trace": [
+  [
+   "Once",
+   1.0
+  ],
+  [
+   " upon",
+   0.03
+  ],
+  [
+   " a",
+   0.02
+  ],
+  [
+   " time",
+   0.02
+  ],
+  [
+   ",",
+   0.02
+  ],
+  [
+   " there",
+   0.03
+  ],
+  [
+   " was",
+   0.02
+  ],
+  [
+   " a",
+   0.02
+  ],
+  [
+   " big",
+   0.29
+  ],
+  [
+   ",",
+   0.14
+  ],
+  [
+   " hairy",
+   0.88
+  ],
+  [
+   " dog",
+   0.05
+  ],
+  [
+   " named",
+   0.04
+  ],
+  [
+   " Max",
+   0.06
+  ],
+  [
+   ".",
+   0.04
+  ],
+  [
+   " Spot",
+   0.43
+  ],
+  [
+   " loved",
+   0.08
+  ],
+  [
+   " to",
+   0.02
+  ],
+  [
+   " fly",
+   0.66
+  ],
+  [
+   " high",
+   0.09
+  ],
+  [
+   " in",
+   0.04
+  ],
+  [
+   " the",
+   0.02
+  ],
+  [
+   " sky",
+   0.03
+  ],
+  [
+   ".",
+   0.03
+  ],
+  [
+   " One",
+   0.57
+  ],
+  [
+   " day",
+   0.02
+  ],
+  [
+   ",",
+   0.02
+  ],
+  [
+   " while",
+   0.46
+  ],
+  [
+   " his",
+   0.98
+  ],
+  [
+   " friends",
+   0.15
+  ],
+  [
+   " came",
+   0.19
+  ],
+  [
+   " to",
+   0.03
+  ],
+  [
+   " school",
+   0.99
+  ],
+  [
+   ",",
+   0.33
+  ],
+  [
+   " they",
+   0.94
+  ],
+  [
+   " saw",
+   0.32
+  ],
+  [
+   " their",
+   0.99
+  ],
+  [
+   " mom",
+   0.09
+  ],
+  [
+   ".",
+   0.38
+  ],
+  [
+   " They",
+   0.05
+  ],
+  [
+   " were",
+   0.33
+  ],
+  [
+   " happy",
+   0.19
+  ],
+  [
+   ".",
+   0.16
+  ],
+  [
+   " They",
+   0.03
+  ],
+  [
+   " went",
+   0.71
+  ],
+  [
+   " back",
+   0.19
+  ],
+  [
+   " to",
+   0.03
+  ],
+  [
+   " the",
+   0.05
+  ],
+  [
+   " shop",
+   0.9
+  ],
+  [
+   " and",
+   0.21
+  ],
+  [
+   " the",
+   0.53
+  ],
+  [
+   " water",
+   0.96
+  ],
+  [
+   ".",
+   0.31
+  ],
+  [
+   " Finally",
+   0.99
+  ],
+  [
+   ",",
+   0.02
+  ],
+  [
+   " the",
+   0.19
+  ],
+  [
+   " cat",
+   0.78
+  ],
+  [
+   " and",
+   0.14
+  ],
+  [
+   " the",
+   0.03
+  ],
+  [
+   " dog",
+   0.12
+  ],
+  [
+   " went",
+   0.63
+  ],
+  [
+   " to",
+   0.07
+  ],
+  [
+   " the",
+   0.04
+  ],
+  [
+   " tree",
+   0.66
+  ],
+  [
+   ".",
+   0.17
+  ],
+  [
+   " The",
+   0.13
+  ],
+  [
+   " bird",
+   0.12
+  ],
+  [
+   " said",
+   0.21
+  ],
+  [
+   ",",
+   0.02
+  ],
+  [
+   " \"",
+   0.02
+  ],
+  [
+   "I",
+   0.09
+  ],
+  [
+   " don",
+   0.44
+  ],
+  [
+   "'t",
+   0.02
+  ],
+  [
+   " want",
+   0.12
+  ],
+  [
+   " to",
+   0.03
+  ],
+  [
+   " go",
+   0.36
+  ],
+  [
+   " far",
+   0.94
+  ],
+  [
+   " away",
+   0.05
+  ],
+  [
+   ".",
+   0.05
+  ],
+  [
+   " I",
+   0.72
+  ]
+ ],
+ "gen_write_frac": 0.2085889570552147
+}

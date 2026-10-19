@@ -1,0 +1,438 @@
+{
+ "model": "sghm_nogate",
+ "params": 5381258,
+ "steps": 1000,
+ "tokens": 8192000,
+ "train_time_s": 252.8518249988556,
+ "tok_per_s": 32398.421486722815,
+ "eval_T256": {
+  "loss": 2.296783951918284,
+  "repeat_content_loss": 4.308398739705555,
+  "novel_content_loss": 4.635511974647323
+ },
+ "eval_T1024": {
+  "loss": 2.304904651641846,
+  "repeat_content_loss": 4.503948118609208,
+  "novel_content_loss": 4.642294638152943,
+  "loss_beyond_256": 2.3047727478875055
+ },
+ "sample": "Once upon a time, there was a little girl named Lily. Lily was a very reliable little girl. They played together every day.\nOne day, Lily came back to the town with a big toy. Lily thought it was very pretty. She thought it was incredible. She took the toy box to her mom and dad, and the toy car. The family had a fun day at the park.One day, a girl named Sue wanted to play on theater. It was very old, and it made her feel happy too.\nSue went to her friend, Tom. Tom said, \"Let's play with the toy cars!\" Tom said, \"No, Tom, I want the toy!\" Tom was very happy. They sat down and put the toy on one of the toy car.\nAs",
+ "sample2": "Lily and Max went to the park. Lily found a big, yummy fruit on the ground. She wanted to play with it and the fruit would be good. In the end, Lily and Max put the apple on their backs. They made a funny face.Once upon a time, there was a big tree. In the tree, there were many animals. The tree was very strong and had many branches. The tree was very happy and could fly. They played all day and had so much fun.\nOne day, a little girl named Amy went to visit the big tree. They played with the tree every day. She was very happy.\nAs they ate, a big wind came. The wind had a big splash in the sky. The wind blew and blew her wings on the ground. When the water got ready, they saw",
+ "log": [
+  {
+   "step": 100,
+   "time": 23.761521100997925,
+   "tokens": 819200,
+   "loss": 3.682070732116699,
+   "local_loss": 3.858523368835449,
+   "write_frac": 1.0,
+   "g_mean": 1.0
+  },
+  {
+   "step": 200,
+   "time": 48.74452805519104,
+   "tokens": 1638400,
+   "loss": 3.0608773231506348,
+   "local_loss": 3.4027323722839355,
+   "write_frac": 1.0,
+   "g_mean": 1.0
+  },
+  {
+   "step": 300,
+   "time": 73.55666708946228,
+   "tokens": 2457600,
+   "loss": 2.7280001640319824,
+   "local_loss": 3.179347515106201,
+   "write_frac": 1.0,
+   "g_mean": 1.0
+  },
+  {
+   "step": 400,
+   "time": 98.19541907310486,
+   "tokens": 3276800,
+   "loss": 2.56099271774292,
+   "local_loss": 3.0765633583068848,
+   "write_frac": 1.0,
+   "g_mean": 1.0
+  },
+  {
+   "step": 500,
+   "time": 123.6671450138092,
+   "tokens": 4096000,
+   "loss": 2.5738167762756348,
+   "local_loss": 3.1212778091430664,
+   "write_frac": 1.0,
+   "g_mean": 1.0,
+   "val": 2.533048379421234
+  },
+  {
+   "step": 600,
+   "time": 149.4526171684265,
+   "tokens": 4915200,
+   "loss": 2.3718669414520264,
+   "local_loss": 2.9368014335632324,
+   "write_frac": 1.0,
+   "g_mean": 1.0
+  },
+  {
+   "step": 700,
+   "time": 175.1344859600067,
+   "tokens": 5734400,
+   "loss": 2.365231513977051,
+   "local_loss": 2.952852249145508,
+   "write_frac": 1.0,
+   "g_mean": 1.0
+  },
+  {
+   "step": 800,
+   "time": 200.95494103431702,
+   "tokens": 6553600,
+   "loss": 2.3507256507873535,
+   "local_loss": 2.9677140712738037,
+   "write_frac": 1.0,
+   "g_mean": 1.0
+  },
+  {
+   "step": 900,
+   "time": 226.44166207313538,
+   "tokens": 7372800,
+   "loss": 2.27693510055542,
+   "local_loss": 2.913301944732666,
+   "write_frac": 1.0,
+   "g_mean": 1.0
+  },
+  {
+   "step": 1000,
+   "time": 251.89389395713806,
+   "tokens": 8192000,
+   "loss": 2.3477249145507812,
+   "local_loss": 2.97119140625,
+   "write_frac": 1.0,
+   "g_mean": 1.0,
+   "val": 2.3099025011062624
+  }
+ ],
+ "gate_trace": [
+  [
+   "Once",
+   1.0
+  ],
+  [
+   " upon",
+   1.0
+  ],
+  [
+   " a",
+   1.0
+  ],
+  [
+   " time",
+   1.0
+  ],
+  [
+   ",",
+   1.0
+  ],
+  [
+   " there",
+   1.0
+  ],
+  [
+   " was",
+   1.0
+  ],
+  [
+   " a",
+   1.0
+  ],
+  [
+   " little",
+   1.0
+  ],
+  [
+   " girl",
+   1.0
+  ],
+  [
+   " named",
+   1.0
+  ],
+  [
+   " Lily",
+   1.0
+  ],
+  [
+   ".",
+   1.0
+  ],
+  [
+   " Lily",
+   1.0
+  ],
+  [
+   " was",
+   1.0
+  ],
+  [
+   " a",
+   1.0
+  ],
+  [
+   " very",
+   1.0
+  ],
+  [
+   " reliable",
+   1.0
+  ],
+  [
+   " little",
+   1.0
+  ],
+  [
+   " girl",
+   1.0
+  ],
+  [
+   ".",
+   1.0
+  ],
+  [
+   " They",
+   1.0
+  ],
+  [
+   " played",
+   1.0
+  ],
+  [
+   " together",
+   1.0
+  ],
+  [
+   " every",
+   1.0
+  ],
+  [
+   " day",
+   1.0
+  ],
+  [
+   ".",
+   1.0
+  ],
+  [
+   "\n",
+   1.0
+  ],
+  [
+   "One",
+   1.0
+  ],
+  [
+   " day",
+   1.0
+  ],
+  [
+   ",",
+   1.0
+  ],
+  [
+   " Lily",
+   1.0
+  ],
+  [
+   " came",
+   1.0
+  ],
+  [
+   " back",
+   1.0
+  ],
+  [
+   " to",
+   1.0
+  ],
+  [
+   " the",
+   1.0
+  ],
+  [
+   " town",
+   1.0
+  ],
+  [
+   " with",
+   1.0
+  ],
+  [
+   " a",
+   1.0
+  ],
+  [
+   " big",
+   1.0
+  ],
+  [
+   " toy",
+   1.0
+  ],
+  [
+   ".",
+   1.0
+  ],
+  [
+   " Lily",
+   1.0
+  ],
+  [
+   " thought",
+   1.0
+  ],
+  [
+   " it",
+   1.0
+  ],
+  [
+   " was",
+   1.0
+  ],
+  [
+   " very",
+   1.0
+  ],
+  [
+   " pretty",
+   1.0
+  ],
+  [
+   ".",
+   1.0
+  ],
+  [
+   " She",
+   1.0
+  ],
+  [
+   " thought",
+   1.0
+  ],
+  [
+   " it",
+   1.0
+  ],
+  [
+   " was",
+   1.0
+  ],
+  [
+   " incredible",
+   1.0
+  ],
+  [
+   ".",
+   1.0
+  ],
+  [
+   " She",
+   1.0
+  ],
+  [
+   " took",
+   1.0
+  ],
+  [
+   " the",
+   1.0
+  ],
+  [
+   " toy",
+   1.0
+  ],
+  [
+   " box",
+   1.0
+  ],
+  [
+   " to",
+   1.0
+  ],
+  [
+   " her",
+   1.0
+  ],
+  [
+   " mom",
+   1.0
+  ],
+  [
+   " and",
+   1.0
+  ],
+  [
+   " dad",
+   1.0
+  ],
+  [
+   ",",
+   1.0
+  ],
+  [
+   " and",
+   1.0
+  ],
+  [
+   " the",
+   1.0
+  ],
+  [
+   " toy",
+   1.0
+  ],
+  [
+   " car",
+   1.0
+  ],
+  [
+   ".",
+   1.0
+  ],
+  [
+   " The",
+   1.0
+  ],
+  [
+   " family",
+   1.0
+  ],
+  [
+   " had",
+   1.0
+  ],
+  [
+   " a",
+   1.0
+  ],
+  [
+   " fun",
+   1.0
+  ],
+  [
+   " day",
+   1.0
+  ],
+  [
+   " at",
+   1.0
+  ],
+  [
+   " the",
+   1.0
+  ],
+  [
+   " park",
+   1.0
+  ]
+ ],
+ "gen_write_frac": 1.0
+}

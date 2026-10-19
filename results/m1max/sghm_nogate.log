@@ -1,0 +1,33 @@
+sghm_nogate: 5.38M params on mps, 1000 steps
+step   100     24s   34.5k tok/s loss=3.682 local_loss=3.859 write_frac=1.000 g_mean=1.000
+step   200     49s   33.6k tok/s loss=3.061 local_loss=3.403 write_frac=1.000 g_mean=1.000
+step   300     74s   33.4k tok/s loss=2.728 local_loss=3.179 write_frac=1.000 g_mean=1.000
+step   400     98s   33.4k tok/s loss=2.561 local_loss=3.077 write_frac=1.000 g_mean=1.000
+step   500    124s   33.1k tok/s loss=2.574 local_loss=3.121 write_frac=1.000 g_mean=1.000 val=2.533
+step   600    149s   32.9k tok/s loss=2.372 local_loss=2.937 write_frac=1.000 g_mean=1.000
+step   700    175s   32.7k tok/s loss=2.365 local_loss=2.953 write_frac=1.000 g_mean=1.000
+step   800    201s   32.6k tok/s loss=2.351 local_loss=2.968 write_frac=1.000 g_mean=1.000
+step   900    226s   32.6k tok/s loss=2.277 local_loss=2.913 write_frac=1.000 g_mean=1.000
+step  1000    252s   32.5k tok/s loss=2.348 local_loss=2.971 write_frac=1.000 g_mean=1.000 val=2.310
+{
+ "model": "sghm_nogate",
+ "params": 5381258,
+ "steps": 1000,
+ "tokens": 8192000,
+ "train_time_s": 252.8518249988556,
+ "tok_per_s": 32398.421486722815,
+ "eval_T256": {
+  "loss": 2.296783951918284,
+  "repeat_content_loss": 4.308398739705555,
+  "novel_content_loss": 4.635511974647323
+ },
+ "eval_T1024": {
+  "loss": 2.304904651641846,
+  "repeat_content_loss": 4.503948118609208,
+  "novel_content_loss": 4.642294638152943,
+  "loss_beyond_256": 2.3047727478875055
+ },
+ "sample": "Once upon a time, there was a little girl named Lily. Lily was a very reliable little girl. They played together every day.\nOne day, Lily came back to the town with a big toy. Lily thought it was very pretty. She thought it was incredible. She took the toy box to her mom and dad, and the toy car. The family had a fun day at the park.One day, a girl named Sue wanted to play on theater. It was very old, and it made her feel happy too.\nSue went to her friend, Tom. Tom said, \"Let's play with the toy cars!\" Tom said, \"No, Tom, I want the toy!\" Tom was very happy. They sat down and put the toy on one of the toy car.\nAs",
+ "sample2": "Lily and Max went to the park. Lily found a big, yummy fruit on the ground. She wanted to play with it and the fruit would be good. In the end, Lily and Max put the apple on their backs. They made a funny face.Once upon a time, there was a big tree. In the tree, there were many animals. The tree was very strong and had many branches. The tree was very happy and could fly. They played all day and had so much fun.\nOne day, a little girl named Amy went to visit the big tree. They played with the tree every day. She was very happy.\nAs they ate, a big wind came. The wind had a big splash in the sky. The wind blew and blew her wings on the ground. When the water got ready, they saw",
+ "gen_write_frac": 1.0
+}

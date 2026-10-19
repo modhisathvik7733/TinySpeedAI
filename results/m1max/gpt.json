@@ -1,0 +1,85 @@
+{
+ "model": "gpt",
+ "params": 4983552,
+ "steps": 1000,
+ "tokens": 8192000,
+ "train_time_s": 147.51987481117249,
+ "tok_per_s": 55531.50048755041,
+ "eval_T256": {
+  "loss": 2.263852270444234,
+  "repeat_content_loss": 3.960039088334987,
+  "novel_content_loss": 4.7437420551828735
+ },
+ "eval_T1024": {
+  "loss": 2.7119763692220054,
+  "repeat_content_loss": 4.655271131178306,
+  "novel_content_loss": 5.137872455027849,
+  "loss_beyond_256": 2.8593523449367946
+ },
+ "sample": "Once upon a time, there was a big, strong dog named Sam. He loved to help people. He would go to her friend, the dog, and her dog. One day, while Sam was walking, he saw a small girl named Sue. Sue was flying high and low. Tom was very happy to have a friend, so he asked Sue.\nSue said, \"Sue, let's play together!\" They played and jumped, and Tim was so happy. They became good friends and played together all day. And they were very happy.Once upon a time, in a small town, there was a big lake. This lake was very interesting. The lake was always there for people who lived in the lake.\nOne day, a little boy named Tim and a fish named Fin. They were",
+ "sample2": "Lily and Max went to the park. Lily found a big box in his room. She was very happy and wanted to show it to Max.\nMax said for a time, and Lily showed Max her toys. Spot said to Max, \"I'm sorry I was rude.\" Max took Lily's hat and they became friends. They all played together and had lots of fun.Once upon a time, in a small town, there was a big factory. A big box lived in a big house with many friends. The people were very good friends and liked to share their toys with everyone.\nOne day, the owner was playing in the yard. The wife saw the toy and wanted to play too. The owner said, \"Please, can I play with you, but don't find my toys.\" The family wanted to be friends with the",
+ "log": [
+  {
+   "step": 100,
+   "time": 14.654573917388916,
+   "tokens": 819200,
+   "loss": 4.350554466247559
+  },
+  {
+   "step": 200,
+   "time": 29.299080848693848,
+   "tokens": 1638400,
+   "loss": 3.484282970428467
+  },
+  {
+   "step": 300,
+   "time": 43.75707793235779,
+   "tokens": 2457600,
+   "loss": 3.027538299560547
+  },
+  {
+   "step": 400,
+   "time": 58.17763686180115,
+   "tokens": 3276800,
+   "loss": 2.75138783454895
+  },
+  {
+   "step": 500,
+   "time": 72.61647176742554,
+   "tokens": 4096000,
+   "loss": 2.723188877105713,
+   "val": 2.640956127643585
+  },
+  {
+   "step": 600,
+   "time": 87.64401888847351,
+   "tokens": 4915200,
+   "loss": 2.44553279876709
+  },
+  {
+   "step": 700,
+   "time": 102.912184715271,
+   "tokens": 5734400,
+   "loss": 2.403327703475952
+  },
+  {
+   "step": 800,
+   "time": 117.29738879203796,
+   "tokens": 6553600,
+   "loss": 2.362971782684326
+  },
+  {
+   "step": 900,
+   "time": 132.17557096481323,
+   "tokens": 7372800,
+   "loss": 2.263040065765381
+  },
+  {
+   "step": 1000,
+   "time": 147.00148797035217,
+   "tokens": 8192000,
+   "loss": 2.3451504707336426,
+   "val": 2.273206079006195
+  }
+ ]
+}

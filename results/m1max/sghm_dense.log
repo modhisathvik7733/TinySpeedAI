@@ -1,0 +1,33 @@
+sghm_dense: 5.38M params on mps, 1000 steps
+step   100     24s   34.7k tok/s loss=3.761 local_loss=3.901 write_frac=0.688 g_mean=0.681
+step   200     49s   33.4k tok/s loss=3.098 local_loss=3.434 write_frac=0.641 g_mean=0.644
+step   300     74s   33.2k tok/s loss=2.728 local_loss=3.216 write_frac=0.635 g_mean=0.636
+step   400     99s   33.1k tok/s loss=2.560 local_loss=3.116 write_frac=0.642 g_mean=0.633
+step   500    125s   32.8k tok/s loss=2.545 local_loss=3.152 write_frac=0.643 g_mean=0.637 val=2.489
+step   600    151s   32.4k tok/s loss=2.301 local_loss=2.968 write_frac=0.637 g_mean=0.625
+step   700    177s   32.4k tok/s loss=2.271 local_loss=2.983 write_frac=0.647 g_mean=0.629
+step   800    203s   32.3k tok/s loss=2.263 local_loss=3.002 write_frac=0.656 g_mean=0.631
+step   900    231s   32.0k tok/s loss=2.183 local_loss=2.946 write_frac=0.646 g_mean=0.625
+step  1000    258s   31.7k tok/s loss=2.247 local_loss=2.985 write_frac=0.652 g_mean=0.628 val=2.210
+{
+ "model": "sghm_dense",
+ "params": 5381258,
+ "steps": 1000,
+ "tokens": 8192000,
+ "train_time_s": 259.3491132259369,
+ "tok_per_s": 31586.766957106902,
+ "eval_T256": {
+  "loss": 2.1971428553263346,
+  "repeat_content_loss": 4.054259891100108,
+  "novel_content_loss": 4.530649895251573
+ },
+ "eval_T1024": {
+  "loss": 2.1891331831614176,
+  "repeat_content_loss": 4.247776579166342,
+  "novel_content_loss": 4.511460313017462,
+  "loss_beyond_256": 2.182996718088786
+ },
+ "sample": "Once upon a time, there was a little girl named Lily. She had an amazing toy. It was soft and round. \nOne day, Lily put on the blue car outside to find a small box. She saw a little girl named Sue. Sue was surprised and wanted to help.\nSue said, \"Max, let me get the box from here.\" So, Lily and her mom took the box home and told Lily, \"I want to find the star!\" Sue said, \"Let's open it and see what happens!\"\nLily and her mom went to the summer place. They found the black box inside. Lily was so happy and proud. The two kids played with the star and the star. Lily and her mom was happy to have made the magic bell.Once upon",
+ "sample2": "Lily and Max went to the park. Lily found a big, round spot in the park. She liked to climb it and climb up. Max was very happy with Lily. He threw the hole from the branch, laughing. He was happy and ready to splash. Lily took a deep breath and went outside to show Max.Once there was a little girl called Charlie. She lived in a small house with her mom and dad. They liked to play and explore. One day, Loric went on a walk to find a big party. \nAs she walked, she noticed a big, red bug up into the tree. She ran to get it from the tree. She walked over to it and said, \"Hello, I am a magic bug!\"\nBlue was so excited she had been so careful. She held",
+ "gen_write_frac": 0.5766871165644172
+}

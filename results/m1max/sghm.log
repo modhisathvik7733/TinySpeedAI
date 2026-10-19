@@ -1,0 +1,33 @@
+sghm: 5.38M params on mps, 1000 steps
+step   100     24s   33.6k tok/s loss=3.713 local_loss=3.853 write_frac=0.678 g_mean=0.674
+step   200     50s   32.7k tok/s loss=3.093 local_loss=3.404 write_frac=0.629 g_mean=0.635
+step   300     76s   32.2k tok/s loss=2.768 local_loss=3.176 write_frac=0.601 g_mean=0.613
+step   400    102s   32.0k tok/s loss=2.606 local_loss=3.075 write_frac=0.589 g_mean=0.602
+step   500    128s   31.9k tok/s loss=2.624 local_loss=3.114 write_frac=0.578 g_mean=0.596 val=2.590
+step   600    155s   31.7k tok/s loss=2.419 local_loss=2.939 write_frac=0.542 g_mean=0.571
+step   700    181s   31.6k tok/s loss=2.410 local_loss=2.941 write_frac=0.545 g_mean=0.569
+step   800    207s   31.6k tok/s loss=2.393 local_loss=2.962 write_frac=0.538 g_mean=0.566
+step   900    233s   31.7k tok/s loss=2.314 local_loss=2.917 write_frac=0.517 g_mean=0.559
+step  1000    258s   31.8k tok/s loss=2.390 local_loss=2.957 write_frac=0.530 g_mean=0.561 val=2.358
+{
+ "model": "sghm",
+ "params": 5381258,
+ "steps": 1000,
+ "tokens": 8192000,
+ "train_time_s": 258.8132028579712,
+ "tok_per_s": 31652.171950808555,
+ "eval_T256": {
+  "loss": 2.3427013397216796,
+  "repeat_content_loss": 4.514763466981228,
+  "novel_content_loss": 4.670968359259209
+ },
+ "eval_T1024": {
+  "loss": 2.3584620634714764,
+  "repeat_content_loss": 4.661553551471829,
+  "novel_content_loss": 4.680272731870014,
+  "loss_beyond_256": 2.36218654844496
+ },
+ "sample": "Once upon a time, there was a little girl named Lily. She had many friends who were very good.\nOne day, Lily went to the park with her mom and dad. She liked to help her mom in the park.\nAt the park, Lily saw a little girl named Sue. She was playing with her toy Mia and her toy car, making a big, scary monster. Sue said, \"Hi, I like my toy car! Can I play with you and the toy?\" Sue smiled and said, \"Yes, you can play with it too.\" Sue and Sue thought about it and decided to take the toy back. He pushed the toy around and started to dance. Lily felt good because she could help her mom and dad play with the toy. Sue, her mom, and her mom went",
+ "sample2": "Lily and Max went to the park. Lily found a big, yummy treat on the table. Lily picked up a big, yummy cake with the cake. Lily did not know the cake was inside.\nTom asked his mom to help her.\n\"Mommy, I got my sandwich!\" she said. \"You need to give it to me. You do a good thing. You can make them feel better.\"\nTom did not want to share her toys with Lily. He was not happy with her fort. She felt a little better, but she was happy she could help. She went to her mom and went outside to play. They played on the swings and the slide. They did not want to play anymore. They had so much fun.\nBut then they heard a noise. It was a toy. It was not a toy.",
+ "gen_write_frac": 0.4049079754601227
+}
