@@ -10,6 +10,9 @@ env:   BATCH, SEQ, LR    override the model's defaults (LR scales with sqrt(BATC
        EVAL_EVERY=250    validation interval in steps (0 = only at the end)
        CKPT_EVERY=<n>    save runs/<model>.ckpt every n steps;  RESUME=1 continues from it
        QUICK=1           skip the final evaluation and samples (for throughput benchmarks)
+       OPT=muon          Muon for hidden weight matrices + AdamW for the rest (MUON_LR, default 0.03)
+       TIME_BUDGET=<s>   train for this many seconds (LR schedule follows time); [steps] becomes a cap
+       RUN_NAME=<name>   results file name (default: the model name)
 """
 import json, math, os, queue, sys, threading, time
 import numpy as np
@@ -18,6 +21,7 @@ import torch.distributed as dist
 import torch.nn.functional as F
 from tokenizers import Tokenizer
 from models import build
+from optim import Muon, Combined, is_muon_param
 
 NAME = sys.argv[1]
 STEPS = int(sys.argv[2]) if len(sys.argv) > 2 else 1000
@@ -39,6 +43,9 @@ COMPILE = CUDA and os.environ.get("COMPILE", "1") == "1"
 QUICK = os.environ.get("QUICK", "0") == "1"
 EVAL_EVERY = int(os.environ.get("EVAL_EVERY", 250))
 CKPT_EVERY = int(os.environ.get("CKPT_EVERY", 0))
+OPT = os.environ.get("OPT", "adamw")
+BUDGET = float(os.environ.get("TIME_BUDGET", 0))
+RUN = os.environ.get("RUN_NAME", NAME)
 torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.allow_tf32 = True
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -197,13 +204,20 @@ def main():
     nparams = sum(p.numel() for p in model.parameters())
     macs = model.macs_per_token(T) if hasattr(model, "macs_per_token") else nparams
     flop_tok = 6 * macs                                     # training FLOPs per token (fwd + bwd)
-    decay = [p for p in model.parameters() if p.dim() >= 2]
-    other = [p for p in model.parameters() if p.dim() < 2]
+    named = list(model.named_parameters())
+    muon = [p for n, p in named if OPT == "muon" and is_muon_param(n, p)]
+    rest = [(n, p) for n, p in named if not any(p is q for q in muon)]
+    decay = [p for n, p in rest if p.dim() >= 2]
+    other = [p for n, p in rest if p.dim() < 2]
     opt = torch.optim.AdamW([{"params": decay, "weight_decay": 0.1}, {"params": other, "weight_decay": 0.0}],
                             lr=LR, betas=(0.9, 0.95), **({"fused": True} if CUDA else {}))
+    if muon:
+        opt = Combined(opt, Muon(muon, lr=float(os.environ.get("MUON_LR", 0.03))))
+    for gr in opt.param_groups:
+        gr["base_lr"] = gr["lr"]
     loader = Batches(train, B, T, seed=1337 + RANK)
     tok_step = B * T * WORLD
-    ckpt_path = os.path.join(OUT, f"{NAME}.ckpt")
+    ckpt_path = os.path.join(OUT, f"{RUN}.ckpt")
     step = 0
     if os.environ.get("RESUME") == "1" and os.path.exists(ckpt_path):
         ck = torch.load(ckpt_path, map_location=DEV)
@@ -211,7 +225,9 @@ def main():
         log(f"resumed from {ckpt_path} at step {step}")
     hist = []
     log(f"{NAME}: {nparams / 1e6:.2f}M params, {flop_tok / 1e6:.2f} MFLOP/token, on {DEV}{' bf16' if AMP else ''}"
-        f" x{WORLD}, batch {B}x{T} ({tok_step / 1e3:.0f}k tok/step), lr {LR:.2e}, {STEPS} steps, data {len(train) / 1e6:.0f}M tokens {loader.mode}")
+        f" x{WORLD}, batch {B}x{T} ({tok_step / 1e3:.0f}k tok/step), lr {LR:.2e}, opt {OPT}"
+        f"{f' ({sum(p.numel() for p in muon) / 1e6:.2f}M params on Muon)' if muon else ''},"
+        f" {f'{BUDGET:.0f}s budget' if BUDGET else f'{STEPS} steps'}, data {len(train) / 1e6:.0f}M tokens {loader.mode}")
 
     fwd = model
     if COMPILE:
@@ -240,10 +256,15 @@ def main():
     t100 = None
     start = step
     while step < STEPS:
-        frac = step / STEPS
-        lr = LR * min(1, (step + 1) / WARM) * (0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * frac)))
+        if BUDGET:
+            frac = (time.time() - t0 - eval_time) / BUDGET
+            if frac >= 1:
+                break
+        else:
+            frac = step / STEPS
+        f = min(1, (step - start + 1) / WARM) * (0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * frac)))
         for gr in opt.param_groups:
-            gr["lr"] = lr
+            gr["lr"] = gr["base_lr"] * f
         x, y = loader.next()
         with autocast():
             _, loss, st = fwd(x, y)
@@ -280,7 +301,7 @@ def main():
     if not MASTER:
         dist.destroy_process_group()
         return
-    res = {"model": NAME, "device": DEV, "world": WORLD, "amp": AMP, "params": nparams, "flop_per_token": flop_tok,
+    res = {"model": NAME, "run": RUN, "opt": OPT, "device": DEV, "world": WORLD, "amp": AMP, "params": nparams, "flop_per_token": flop_tok,
            "steps": step, "tokens": step * tok_step, "train_time_s": train_time, "tok_per_s": tokens / train_time,
            "steady_tok_per_s": steady, "batch": B, "seq": T, "lr": LR, "log": hist}
     if not QUICK:
@@ -293,9 +314,9 @@ def main():
             pieces = [tok.decode([i]) for i in ids[:len(gates)]]
             res["gate_trace"] = list(zip(pieces, [round(g, 2) for g in gates]))[:80]
             res["gen_write_frac"] = float(np.mean(np.array(gates) > 0.5))
-        with open(os.path.join(OUT, f"{NAME}.json"), "w") as f:
+        with open(os.path.join(OUT, f"{RUN}.json"), "w") as f:
             json.dump(res, f, indent=1)
-        torch.save(model.state_dict(), os.path.join(OUT, f"{NAME}.pt"))
+        torch.save(model.state_dict(), os.path.join(OUT, f"{RUN}.pt"))
     print(json.dumps({k: v for k, v in res.items() if k not in ("log", "gate_trace")}, indent=1))
     if DDP:
         dist.destroy_process_group()

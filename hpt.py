@@ -145,9 +145,21 @@ class AdaptiveHead(nn.Module):
         tail = r >= self.n_head
         nll = F.cross_entropy(lh.reshape(-1, self.n_head + 1), torch.where(tail, self.n_head, r).reshape(-1),
                               reduction="none").view(y.shape)
-        return nll + self._tail_nll(h, r, tail)
+        return nll + (self._tail_nll_fixed(h, r, tail) if self.training else self._tail_nll(h, r, tail))
 
-    @torch.compiler.disable  # data-dependent subset of positions: run eagerly, outside the compiled graph
+    def _tail_nll_fixed(self, h, r, tail):
+        """Training path: a fixed-size buffer of the positions with rare targets (tail positions sorted first),
+        so shapes are static and there is no GPU->CPU sync. The buffer holds 1.5x the expected tail share;
+        in the vanishingly rare overflow case a few tail terms are skipped for that step."""
+        N = r.numel()
+        cap = min(N, int(N * (1.5 * self.tail_frac + 0.01)) + 64)
+        hf, rf, tf = h.reshape(N, -1), r.reshape(-1), tail.reshape(-1)
+        order = torch.topk(tf.to(h.dtype), cap, sorted=False).indices
+        lt = self.tail(hf[order]).float()
+        ce = F.cross_entropy(lt, (rf[order] - self.n_head).clamp(min=0), reduction="none") * tf[order]
+        return torch.zeros(N, device=h.device, dtype=ce.dtype).index_add(0, order, ce).view(r.shape)
+
+    @torch.compiler.disable  # exact path (evaluation): data-dependent subset, run eagerly
     def _tail_nll(self, h, r, tail):
         idx = tail.nonzero(as_tuple=True)
         lt = self.tail(h[idx]).float()
