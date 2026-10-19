@@ -1,7 +1,7 @@
 """Train a model on TinyStories for a fixed number of steps on CUDA / MPS / CPU, then evaluate.
 
 usage: python train.py <model> [steps]
-env:   AMP=0 disables bf16 autocast on CUDA
+env:   AMP=0 disables bf16 autocast on CUDA; COMPILE=0 disables torch.compile; BATCH=<n> (default 128)
 """
 import json, math, os, sys, time
 import numpy as np
@@ -12,9 +12,11 @@ from models import build
 
 NAME = sys.argv[1]
 STEPS = int(sys.argv[2]) if len(sys.argv) > 2 else 1000
-B, T, LR, WARM = 32, 256, 2e-3, 100
+B, T, WARM = int(os.environ.get("BATCH", 128)), 256, 100
+LR = 2e-3 * (B / 32) ** 0.5
 DEV = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 AMP = DEV == "cuda" and os.environ.get("AMP", "1") == "1"
+COMPILE = DEV == "cuda" and os.environ.get("COMPILE", "1") == "1"
 torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.allow_tf32 = True
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -41,6 +43,13 @@ def sync():
         torch.mps.synchronize()
 
 
+def gpu_batch(data_t, bs, tl):
+    """Training batches sliced straight from the token array kept on the device (no CPU work)."""
+    ix = torch.randint(0, data_t.numel() - tl - 1, (bs, 1), device=data_t.device)
+    chunk = data_t[ix + torch.arange(tl + 1, device=data_t.device)].long()
+    return chunk[:, :-1], chunk[:, 1:]
+
+
 def batch(data, bs, tl, rng):
     ix = rng.integers(0, len(data) - tl - 1, bs)
     x = torch.from_numpy(np.stack([data[i:i + tl] for i in ix]).astype(np.int64))
@@ -51,7 +60,6 @@ def batch(data, bs, tl, rng):
 @torch.no_grad()
 def evaluate(model, tl, n_batches, bs=16):
     """val loss, plus loss split by whether the target is a *repeated content token* (needs binding)."""
-    model.eval()
     rng = np.random.default_rng(0)
     tot = rep = nov = 0.0
     n_tot = n_rep = n_nov = 0
@@ -73,7 +81,6 @@ def evaluate(model, tl, n_batches, bs=16):
         nov += ce[novel].sum().item(); n_nov += novel.sum().item()
         if tl > 256:
             late += ce[:, 256:].sum().item(); n_late += ce[:, 256:].numel()
-    model.train()
     out = {"loss": tot / n_tot, "repeat_content_loss": rep / max(n_rep, 1), "novel_content_loss": nov / max(n_nov, 1)}
     if n_late:
         out["loss_beyond_256"] = late / n_late
@@ -82,7 +89,6 @@ def evaluate(model, tl, n_batches, bs=16):
 
 @torch.no_grad()
 def sample(model, prompt, n=160, temp=0.8, topk=40):
-    model.eval()
     ids = tok.encode(prompt).ids
     g = torch.Generator().manual_seed(7)
     gates = []
@@ -102,7 +108,6 @@ def sample(model, prompt, n=160, temp=0.8, topk=40):
             ctx = torch.tensor([ids[-T:]], device=DEV)
             logits, _, _ = model(ctx)
             ids.append(pick(logits[0, -1], temp, topk, g))
-    model.train()
     return tok.decode(ids), gates, ids
 
 
@@ -118,23 +123,43 @@ def main():
     decay = [p for p in model.parameters() if p.dim() >= 2]
     other = [p for p in model.parameters() if p.dim() < 2]
     opt = torch.optim.AdamW([{"params": decay, "weight_decay": 0.1}, {"params": other, "weight_decay": 0.0}],
-                            lr=LR, betas=(0.9, 0.95))
-    rng = np.random.default_rng(1)
+                            lr=LR, betas=(0.9, 0.95), **({"fused": True} if DEV == "cuda" else {}))
+    train_t = torch.from_numpy(train.astype(np.int32)).to(DEV)
     log = []
-    print(f"{NAME}: {nparams / 1e6:.2f}M params on {DEV}{' (bf16)' if AMP else ''}, {STEPS} steps")
+    print(f"{NAME}: {nparams / 1e6:.2f}M params on {DEV}{' bf16' if AMP else ''}, batch {B}x{T}, {STEPS} steps", flush=True)
+
+    fwd = model
+    if COMPILE:
+        t_c = time.time()
+        try:
+            fwd = torch.compile(model)
+            x, y = gpu_batch(train_t, B, T)
+            with autocast():
+                _, loss, st = fwd(x, y)
+            (loss + sum(st.values())).backward()
+            opt.zero_grad(set_to_none=True)
+            sync()
+            print(f"compiled in {time.time() - t_c:.0f}s", flush=True)
+        except Exception as e:  # e.g. no Triton support for this GPU: fall back to eager
+            print(f"torch.compile failed ({type(e).__name__}: {str(e)[:200]}), using eager", flush=True)
+            fwd = model
+            opt.zero_grad(set_to_none=True)
+
     t0 = time.time()
+    eval_time = 0.0
+    t100 = None
     step = 0
     while step < STEPS:
         frac = step / STEPS
         lr = LR * min(1, (step + 1) / WARM) * (0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * frac)))
         for gr in opt.param_groups:
             gr["lr"] = lr
-        x, y = batch(train, B, T, rng)
+        x, y = gpu_batch(train_t, B, T)
         with autocast():
-            _, loss, st = model(x, y)
+            _, loss, st = fwd(x, y)
         total = loss
-        if "local_loss" in st:
-            total = total + 0.2 * st["local_loss"] + 0.01 * st["g_mean"]
+        if "pred_loss" in st:
+            total = total + 0.1 * st["pred_loss"] + 0.01 * st["g_mean"]
         opt.zero_grad(set_to_none=True)
         total.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -142,23 +167,29 @@ def main():
         step += 1
         if step % 100 == 0:
             sync()
-            el = time.time() - t0
+            el = time.time() - t0 - eval_time
+            if step == 100:
+                t100 = el
             row = {"step": step, "time": el, "tokens": step * B * T, "loss": loss.item(),
                    **{k: v.item() for k, v in st.items()}}
             if step % 250 == 0:
+                te = time.time()
                 row["val"] = evaluate(model, T, 20)["loss"]
+                eval_time += time.time() - te
             log.append(row)
             extra = " ".join(f"{k}={v:.3f}" for k, v in row.items() if k not in ("step", "time", "tokens"))
-            print(f"step {step:5d} {el:6.0f}s {step * B * T / el / 1e3:6.1f}k tok/s {extra}", flush=True)
+            print(f"step {step:5d} {el:6.1f}s {step * B * T / el / 1e3:7.1f}k tok/s {extra}", flush=True)
     sync()
-    train_time = time.time() - t0
+    train_time = time.time() - t0 - eval_time
     tokens = step * B * T
+    steady = (tokens - 100 * B * T) / (train_time - t100) if t100 and step > 100 else tokens / train_time
+    print(f"steady-state throughput: {steady / 1e3:.1f}k tok/s", flush=True)
     ev256 = evaluate(model, 256, 60)
     ev1024 = evaluate(model, 1024, 15)
     story, gates, ids = sample(model, "Once upon a time")
     story2, _, _ = sample(model, "Lily and Max went to the park. Lily found a")
     res = {"model": NAME, "device": DEV, "amp": AMP, "params": nparams, "steps": step, "tokens": tokens, "train_time_s": train_time,
-           "tok_per_s": tokens / train_time, "eval_T256": ev256, "eval_T1024": ev1024,
+           "tok_per_s": tokens / train_time, "steady_tok_per_s": steady, "batch": B, "eval_T256": ev256, "eval_T1024": ev1024,
            "sample": story, "sample2": story2, "log": log}
     if gates:
         pieces = [tok.decode([i]) for i in ids[:len(gates)]]

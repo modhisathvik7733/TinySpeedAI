@@ -1,6 +1,6 @@
 """Train a small BPE tokenizer on a TinyStories slice and encode train/val to uint16 arrays.
 
-usage: python prepare.py [train_MB]   (default 40)
+usage: python prepare.py [train_MB]   (default 200)
 Uses a local copy if present, otherwise streams the first train_MB of TinyStoriesV2 from Hugging Face.
 """
 import os, sys, time, urllib.request
@@ -10,7 +10,7 @@ from tokenizers import Tokenizer, models, trainers, pre_tokenizers, decoders
 LOCAL = os.path.expanduser("~/Extreme_Speed_Check/data/tinystories")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 HF = "https://huggingface.co/datasets/roneneldan/TinyStories/resolve/main/"
-TRAIN_BYTES = int(float(sys.argv[1]) * 1e6) if len(sys.argv) > 1 else 40_000_000
+TRAIN_BYTES = int(float(sys.argv[1]) * 1e6) if len(sys.argv) > 1 else 200_000_000
 VOCAB = 4096
 EOT = "<|endoftext|>"
 
@@ -70,6 +70,7 @@ def main():
         arr = np.array(ids, dtype=np.uint16)
         arr.tofile(os.path.join(OUT, f"{name}.bin"))
         print(f"{name}: {len(arr):,} tokens")
+    open(os.path.join(OUT, f"prepared_{TRAIN_BYTES // 10**6}MB"), "w").close()
     print(f"done in {time.time() - t0:.1f}s")
 
 

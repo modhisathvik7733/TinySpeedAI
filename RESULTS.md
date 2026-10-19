@@ -1,4 +1,33 @@
-# Results: SGHM vs. a transformer on TinyStories (M1 Max, MPS)
+# Results: SGHM vs. a transformer on TinyStories
+
+## v1 on an RTX 5060 Ti (CUDA, bf16, 1000 steps × 32×256 tokens)
+
+| model | params | tok/s | val (T=256) | val (T=1024) | loss past position 256 | repeated content tokens | first-time content tokens |
+|---|---|---|---|---|---|---|---|
+| GPT | 4.98M | **410k** | 2.256 | 2.636 | 2.761 | **4.07** | 4.78 |
+| SGHM v1, dense keys | 5.38M | 193k | **2.198** | **2.191** | **2.187** | 4.11 | **4.56** |
+
+The quality result from the M1 reproduces on the GPU. But **v1 trained 2.1× slower than GPT**, which goes against the speed goal. The causes:
+- a second full-vocabulary softmax used only to compute surprise (about 1M multiply-adds per token)
+- `topk` for k-WTA in every MLP
+- two memory modules with unfused projections
+- batches built on the CPU, and no compilation
+
+**v2** (current `models.py`) changes:
+- Surprise is the predictive-coding error in embedding space, `1 − cos(pred_{t−1}, emb(x_t))`.
+- The MLP is dense.
+- One memory with a single fused projection.
+- The dataset is kept on the GPU, with `torch.compile`, fused AdamW and batch 128.
+
+SGHM v2 does about 30% fewer FLOPs per token than GPT.
+
+### Why 100M tok/s is out of reach for gradient-trained networks on this GPU
+- Training costs about 6 × params FLOPs per token.
+- A 5M-param model therefore needs about 30 MFLOP per token.
+- At a realistic 50–90 TFLOPS of bf16, the ceiling is about 2–3M tok/s.
+- 100M tok/s would need either a model of about 80k params or no gradient training at all.
+
+## v1 on an M1 Max (MPS)
 
 The design and its reasoning are in [DESIGN.md](DESIGN.md).
 
@@ -48,6 +77,6 @@ Loss is in nats per token on the validation split; lower is better.
 python prepare.py 40          # tokenizer and data, ~10 s
 python test_equiv.py          # parallel form == recurrent form
 python train.py gpt 1000
-python train.py sghm_dense 1000
+python train.py sghm 1000
 python compare.py
 ```

@@ -8,14 +8,14 @@ SGHM is a language model whose context memory is a **fixed-size matrix of fast s
 ## Files
 | file | what it does |
 |---|---|
-| `prepare.py` | Streams the first 40 MB of TinyStoriesV2 from Hugging Face, trains a 4096-token BPE tokenizer, and writes `data/*.bin` |
+| `prepare.py` | Streams the first 200 MB of TinyStoriesV2 from Hugging Face, trains a 4096-token BPE tokenizer, and writes `data/*.bin` |
 | `models.py` | `SGHM` (parallel training form plus O(1)-state recurrent `step`) and the `GPT` baseline |
 | `test_equiv.py` | Checks that the parallel and recurrent forms of SGHM agree |
 | `train.py` | `python train.py <model> [steps]`. Picks CUDA, then MPS, then CPU; uses bf16 autocast on CUDA. Writes `runs/<model>.json` |
 | `compare.py` | Prints the results table from `runs/*.json` |
 | `run.sh` | Runs everything in order |
 
-Models: `gpt`, `sghm` (sparse keys), `sghm_dense` (best so far), `sghm_nogate`, `sghm_nomem`.
+Models: `gpt`, `sghm` (v2, speed-optimised), `sghm_nogate` (writes every token), `sghm_nomem` (no fast memory).
 
 ## Run on a GPU (e.g. vast.ai RTX 5060 Ti, `pytorch_cuda-12.8` image)
 
@@ -27,15 +27,17 @@ cd TinySpeedAI
 pip install -r requirements.txt
 nvidia-smi                                   # confirm the GPU is visible
 python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
-bash run.sh                                  # 1000 steps: gpt, then sghm_dense
+bash run.sh                                  # 1000 steps × 128×256 tokens: gpt, then sghm
 ```
 
 Other options:
 
 ```bash
 bash run.sh 3000                                           # longer run
-bash run.sh 1000 gpt sghm sghm_dense sghm_nogate sghm_nomem   # full ablation set
-python train.py sghm_dense 2000                            # a single model
+bash run.sh 1000 gpt sghm sghm_nogate sghm_nomem   # full ablation set
+BATCH=256 bash run.sh                                      # bigger batch for more tok/s
+COMPILE=0 python train.py sghm 1000                        # skip torch.compile if it fails
+python train.py sghm 2000                                  # a single model
 AMP=0 python train.py gpt 1000                             # fp32 instead of bf16
 ```
 
