@@ -23,7 +23,7 @@ from sac import causal_conv
 # fla layer class names tried in order, and per-layer constructor overrides (filtered by signature)
 FLA = {
     "gdn":    (["GatedDeltaNet"], dict(head_dim=64, expand_v=1)),
-    "hgrn2":  (["HGRN2Attention"], dict()),
+    "hgrn2":  (["HGRN2Attention"], dict(expand_ratio=64)),   # heads = hidden_size // expand_ratio
     "gla":    (["GatedLinearAttention"], dict(expand_k=0.5, expand_v=1)),
     "retnet": (["MultiScaleRetention"], dict(expand_k=1, expand_v=1)),
     "mamba2": (["Mamba2"], dict(head_dim=64, expand=2, num_heads=8)),
