@@ -7,6 +7,7 @@ Changes against the GPT baseline in models.py, each aimed at loss per FLOP or FL
     scored everywhere and the rare tail only where needed, cutting the head from ~20% of the FLOPs to ~7%
 Meant to be trained with OPT=muon (see optim.py).
 """
+import json, os
 import torch
 import torch.nn as nn
 from hpt import Block, Norm, AdaptiveHead
@@ -67,4 +68,5 @@ class FGPT(nn.Module):
 
 
 def build_fgpt(name, vocab):
-    return FGPT(vocab, **PRESETS[name])
+    """CFG='{"L":5,"mlp":3}' overrides preset fields (used by tune.sh)."""
+    return FGPT(vocab, **{**PRESETS[name], **json.loads(os.environ.get("CFG") or "{}")})

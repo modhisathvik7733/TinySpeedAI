@@ -13,6 +13,7 @@ env:   BATCH, SEQ, LR    override the model's defaults (LR scales with sqrt(BATC
        OPT=muon          Muon for hidden weight matrices + AdamW for the rest (MUON_LR, default 0.03)
        TIME_BUDGET=<s>   train for this many seconds (LR schedule follows time); [steps] becomes a cap
        RUN_NAME=<name>   results file name (default: the model name)
+       SEED=<n>          random seed (default 1337);  CFG='{"L":5}' overrides FGPT preset fields
 """
 import json, math, os, queue, sys, threading, time
 import numpy as np
@@ -52,7 +53,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.environ.get("DATA", os.path.join(HERE, "data"))
 OUT = os.path.join(HERE, "runs")
 os.makedirs(OUT, exist_ok=True)
-torch.manual_seed(1337)
+SEED = int(os.environ.get("SEED", 1337))
+torch.manual_seed(SEED)
 
 train = np.memmap(os.path.join(DATA, "train.bin"), dtype=np.uint16, mode="r")
 val = np.memmap(os.path.join(DATA, "val.bin"), dtype=np.uint16, mode="r")
@@ -215,7 +217,7 @@ def main():
         opt = Combined(opt, Muon(muon, lr=float(os.environ.get("MUON_LR", 0.03))))
     for gr in opt.param_groups:
         gr["base_lr"] = gr["lr"]
-    loader = Batches(train, B, T, seed=1337 + RANK)
+    loader = Batches(train, B, T, seed=SEED + RANK)
     tok_step = B * T * WORLD
     ckpt_path = os.path.join(OUT, f"{RUN}.ckpt")
     step = 0
@@ -301,7 +303,7 @@ def main():
     if not MASTER:
         dist.destroy_process_group()
         return
-    res = {"model": NAME, "run": RUN, "opt": OPT, "device": DEV, "world": WORLD, "amp": AMP, "params": nparams, "flop_per_token": flop_tok,
+    res = {"model": NAME, "run": RUN, "opt": OPT, "cfg": os.environ.get("CFG", ""), "seed": SEED, "device": DEV, "world": WORLD, "amp": AMP, "params": nparams, "flop_per_token": flop_tok,
            "steps": step, "tokens": step * tok_step, "train_time_s": train_time, "tok_per_s": tokens / train_time,
            "steady_tok_per_s": steady, "batch": B, "seq": T, "lr": LR, "log": hist}
     if not QUICK:
