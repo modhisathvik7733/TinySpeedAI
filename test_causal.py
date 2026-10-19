@@ -33,5 +33,7 @@ with torch.no_grad():
     print(f"max |train nll - sampling nll| = {err:.1e}")
     assert err < 1e-4, err
     odd = m.hidden(idx[:, :37])                                      # length not a multiple of P
-    assert (odd - h[:, :37]).abs().max() == 0
+    pad_err = (odd - h[:, :37]).abs().max().item()
+    print(f"max |unpadded - padded| = {pad_err:.1e}")
+    assert pad_err < 1e-4, pad_err                                   # float rounding differs across shapes
 print("OK")
