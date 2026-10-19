@@ -19,6 +19,6 @@ python test_equiv.py
 mkdir -p runs
 for m in $MODELS; do
   echo "=== $m ($STEPS steps) ==="
-  python train.py "$m" "$STEPS" 2>&1 | tee "runs/$m.log" | grep -E "params,|compile|^step|steady|Traceback|Error"
+  python train.py "$m" "$STEPS" 2>&1 | tee "runs/$m.log" | grep --line-buffered -E "params,|compil|^step|steady|evaluat|val@|done:|Traceback|Error|failed"
 done
-python compare.py
+echo; echo "==================== SUMMARY (copy from here) ===================="; python compare.py

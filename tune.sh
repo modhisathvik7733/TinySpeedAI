@@ -8,7 +8,7 @@ run() {
   name=$1; shift
   echo "=== $name: $* ==="
   env "$@" OPT=${OPT:-muon} RUN_NAME=t_$name TIME_BUDGET=$BUDGET EVAL_EVERY=200 python train.py ${MODEL:-fgpt} 1000000 2>&1 \
-    | tee "runs/t_$name.log" | grep -E "params,|steady|Traceback|Error|failed"
+    | tee "runs/t_$name.log" | grep --line-buffered -E "params,|compil|^step|steady|evaluat|val@|done:|Traceback|Error|failed"
 }
 run base
 run seed2   SEED=2                       # same config, other seed: the noise level
@@ -24,4 +24,4 @@ run d320    CFG='{"d":320,"heads":5}'
 run mlp3    CFG='{"mlp":3}'
 run head2k  CFG='{"n_head":2048}'
 run head512 CFG='{"n_head":512}'
-python compare.py t_
+echo; echo "==================== SUMMARY (copy from here) ===================="; python compare.py t_

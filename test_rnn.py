@@ -18,6 +18,7 @@ try:
     import fla  # noqa: F401
     dev = "cuda"
     for kind in FLA:
+        print(f"rnn_{kind}: building + first GPU call (kernel compile can take a minute)...", flush=True)
         try:
             lm = RNNLM(300, kind, d=64, n_layers=2).to(dev)
             idx = torch.randint(0, 300, (2, 128), device=dev)

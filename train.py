@@ -237,6 +237,7 @@ def main():
 
     fwd = model
     if COMPILE:
+        log("compiling (first step; can take 1-2 min, kernels are being built)...")
         t_c = time.time()
         mode = os.environ.get("COMPILE_MODE") or None
         try:
@@ -311,8 +312,11 @@ def main():
            "steps": step, "tokens": step * tok_step, "train_time_s": train_time, "tok_per_s": tokens / train_time,
            "steady_tok_per_s": steady, "batch": B, "seq": T, "lr": LR, "log": hist}
     if not QUICK:
+        log("final evaluation at T=256...")
         res["eval_T256"] = evaluate(model, 256, 60)
+        log(f"  val@T256 = {res['eval_T256']['loss']:.3f}; evaluation at T=1024...")
         res["eval_T1024"] = evaluate(model, 1024, 15)
+        log(f"  val@T1024 = {res['eval_T1024']['loss']:.3f}; generating samples...")
         story, gates, ids = sample(model, "Once upon a time", T)
         story2, _, _ = sample(model, "Lily and Max went to the park. Lily found a", T)
         res["sample"], res["sample2"] = story, story2
@@ -323,7 +327,9 @@ def main():
         with open(os.path.join(OUT, f"{RUN}.json"), "w") as f:
             json.dump(res, f, indent=1)
         torch.save(model.state_dict(), os.path.join(OUT, f"{RUN}.pt"))
-    print(json.dumps({k: v for k, v in res.items() if k not in ("log", "gate_trace")}, indent=1))
+    log(f"done: {NAME} ({RUN})")
+    if QUICK:
+        print(json.dumps({k: v for k, v in res.items() if k not in ("log", "gate_trace")}, indent=1))
     if DDP:
         dist.destroy_process_group()
 
